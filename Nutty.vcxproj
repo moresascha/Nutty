@@ -119,10 +119,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Nutty\Alloc.h" />
+    <ClInclude Include="Nutty\base\reduce.h" />
     <ClInclude Include="Nutty\base\sort.h" />
     <ClInclude Include="Nutty\cuda\Array.h" />
     <ClInclude Include="Nutty\base\Buffer.h" />
     <ClInclude Include="Nutty\cuda\copy.h" />
+    <ClInclude Include="Nutty\cuda\reduce.h" />
     <ClInclude Include="Nutty\DeviceBuffer.h" />
     <ClInclude Include="Nutty\Copy.h" />
     <ClInclude Include="Nutty\base\copy.h" />
@@ -145,7 +147,9 @@
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="Nutty\testing\reduce.cu" />
-    <CudaCompile Include="Nutty\testing\sort.cu" />
+    <CudaCompile Include="Nutty\testing\sort.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Nutty\cuda\Globals.cuh" />

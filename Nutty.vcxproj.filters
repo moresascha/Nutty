@@ -99,6 +99,12 @@
     <ClInclude Include="Nutty\base\sort.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
+    <ClInclude Include="Nutty\base\reduce.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="Nutty\cuda\reduce.h">
+      <Filter>Header Files\cuda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="Nutty\testing\sort.cu">

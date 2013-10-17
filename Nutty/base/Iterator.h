@@ -157,8 +157,8 @@ namespace nutty
         typename T,
         typename C
     >
-    size_t Distance(Iterator<T, C>& start, Iterator<T, C>& end)
+    size_t Distance(Iterator<T, C>& begin, Iterator<T, C>& end)
     {
-        return (end() - start());
+        return (end() - begin());
     }
 }
