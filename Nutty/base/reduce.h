@@ -32,30 +32,30 @@ namespace nutty
         >
         void Reduce(
         Iterator<
-        T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
-        >& dstBegin, 
+                T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
+                >& dstBegin, 
         Iterator<
-        T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
-        >& dstEnd,
+                T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
+                >& dstEnd,
 
         Iterator<
-        T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-        >& srcBegin, 
+                T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+                >& srcBegin, 
         Iterator<
-        T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-        >& srcEnd,
+                T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+                >& srcEnd,
 
         BinaryOperation op)
         {
             size_t dd = Distance(srcBegin, srcEnd);
 
-            DeviceBuffer<T> dst(dd);
+            DeviceBuffer<T> deviceDest(dd);
 
-            nutty::cuda::Reduce(srcBegin(), dst.Begin()(), dd, op);
+            nutty::cuda::Reduce(deviceDest.Begin()(), srcBegin(), dd, op);
 
             size_t dh = Distance(dstBegin, dstEnd);
 
-            nutty::Copy(dstBegin, dst.Begin(), dh);
+            nutty::Copy(dstBegin, deviceDest.Begin(), dh);
         }
     }
 }

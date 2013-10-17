@@ -42,14 +42,14 @@ namespace nutty
         >
         __global__ void reduce(T_SRC* data, T_DST* dst, BinaryOperator _operator, uint stride, uint memoryOffset)
         {
-            /*extern __shared__ T_DST s_d[];
+            extern __shared__ T_DST s_d[];
 
             uint si = blockIdx.x * stride + threadIdx.x;
 
             T_SRC d0 = data[memoryOffset + si];
             T_SRC d1 = data[memoryOffset + si + blockDim.x];
 
-            __reduce(s_d, d0, d1, dst, _operator);*/
+            __reduce<T_DST*, T_SRC, T_DST*, BinaryOperator>(s_d, d0, d1, dst, _operator);
         }
 
         /*

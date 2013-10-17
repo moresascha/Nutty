@@ -16,7 +16,7 @@ void print(const int& t)
     OutputDebugStringA(ss.str().c_str());
 }
 
-__device__ int& reduce_min(int& t0, int& t1)
+__device__ __host__ const int& reduce_min(const int& t0, const int& t1)
 {
     return t0 < t1 ? t0 : t1; 
 }
@@ -41,19 +41,17 @@ int main(void)
 
     nutty::Fill(a.Begin(), a.End(), rand);
 
-    //nutty::ForEach(a.Begin(), a.End(), print);
+    nutty::ForEach(a.Begin(), a.End(), print);
 
-    //OutputDebugStringA("\n");
-
-    print(r[0]);
+    //OutputDebugStringA("\n"); print(r[0]);
 
     OutputDebugStringA("\n");
 
-    nutty::Reduce(r, a, reduce_min);
+    nutty::Reduce(a, reduce_min);
 
-    print(r[0]);
+    //OutputDebugStringA("\n"); print(r[0]);
 
-    //nutty::ForEach(a.Begin(), a.End(), print);
+    nutty::ForEach(a.Begin(), a.End(), print);
 
     nutty::Destroy();
 
