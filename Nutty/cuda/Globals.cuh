@@ -1,6 +1,6 @@
 #pragma once
 #include <device_launch_parameters.h>
-#include "inc/cutil_math.h"
+#include "../inc/cutil_math.h"
 
 #define INVALID_DATA_ADD ((uint)-1)
 #define FLT_MAX 3.402823466e+38F

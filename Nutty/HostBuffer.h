@@ -1,7 +1,5 @@
 #pragma once
 #include "base/Buffer.h"
-#include "Copy.h"
-#include "Alloc.h"
 
 namespace nutty
 {

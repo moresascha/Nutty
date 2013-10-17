@@ -96,10 +96,7 @@ namespace nutty
 
             uint shrdMem = elementsPerBlock * sizeof(T);
 
-            bitonicMergeSortPerGroup<
-                T, 
-                BinaryOperation
-            >
+            bitonicMergeSortPerGroup
             <<<grid, block, shrdMem>>>
             (
             start(), startStage, startStep, length, op

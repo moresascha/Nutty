@@ -6,6 +6,7 @@
 #include <fstream>
 #include "../Inc.h"
 #include "../ForEach.h"
+#include <time.h>
 
 void print(const int& t)
 {
@@ -13,6 +14,11 @@ void print(const int& t)
     ss << t;
     ss << " ";
     OutputDebugStringA(ss.str().c_str());
+}
+
+__device__ int& reduce_min(int& t0, int& t1)
+{
+    return t0 < t1 ? t0 : t1; 
 }
 
 int main(void)
@@ -27,17 +33,27 @@ int main(void)
 
     nutty::Init();
 
+    srand((uint)time(NULL));
+
     nutty::DeviceBuffer<int> a(128);
 
-    nutty::Generate(a.Begin(), a.End(), rand);
+    nutty::HostBuffer<int> r(1, 10);
 
-    nutty::ForEach(a.Begin(), a.End(), print);
+    nutty::Fill(a.Begin(), a.End(), rand);
+
+    //nutty::ForEach(a.Begin(), a.End(), print);
+
+    //OutputDebugStringA("\n");
+
+    print(r[0]);
 
     OutputDebugStringA("\n");
 
-    nutty::ReduceMax(a);
+    nutty::Reduce(r, a, reduce_min);
 
-    nutty::ForEach(a.Begin(), a.End(), print);
+    print(r[0]);
+
+    //nutty::ForEach(a.Begin(), a.End(), print);
 
     nutty::Destroy();
 

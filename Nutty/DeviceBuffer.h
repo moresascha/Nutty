@@ -1,6 +1,5 @@
 #pragma once
 #include "base/Buffer.h"
-#include "Copy.h"
 
 namespace nutty
 {

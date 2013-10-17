@@ -77,6 +77,11 @@ namespace nutty
             return m_ptr;
         }
 
+        pointer operator()(void) const
+        {
+            return m_ptr;
+        }
+
         T operator*(void)
         {
             return (*m_container)[*this];

@@ -119,6 +119,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Nutty\Alloc.h" />
+    <ClInclude Include="Nutty\base\Content.h" />
+    <ClInclude Include="Nutty\base\fill.h" />
     <ClInclude Include="Nutty\base\reduce.h" />
     <ClInclude Include="Nutty\base\sort.h" />
     <ClInclude Include="Nutty\cuda\Array.h" />
@@ -146,7 +148,9 @@
     <ClInclude Include="Nutty\cuda\Stream.h" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="Nutty\testing\reduce.cu" />
+    <CudaCompile Include="Nutty\testing\reduce.cu">
+      <CodeGeneration Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">compute_20,sm_20</CodeGeneration>
+    </CudaCompile>
     <CudaCompile Include="Nutty\testing\sort.cu">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </CudaCompile>

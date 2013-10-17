@@ -40,6 +40,7 @@ namespace nutty
                 m_size = n;
                 m_ptr = 0;
                 Resize(m_size);
+                Fill(Begin(), End(), t);
             }
 
             iterator Begin(void)

@@ -1,5 +1,6 @@
 #pragma once
 #include "base/Buffer.h"
+#include "base/fill.h"
 #include "Copy.h"
 
 namespace nutty
@@ -20,7 +21,7 @@ namespace nutty
         typename C,
         typename Generator
     >
-    void Generate(Iterator<T, C>& begin, Iterator<T, C>& end, Generator g)
+    void Fill(Iterator<T, C>& begin, Iterator<T, C>& end, Generator g)
     {
         size_t d = Distance(begin, end);
 
@@ -38,9 +39,8 @@ namespace nutty
         typename T,
         typename C
     >
-    void Fill(Iterator<T, C>& begin, Iterator<T, C>& end, T v)
+    void Fill(Iterator<T, C>& begin, Iterator<T, C>& end, const T& v)
     {
-        DefaultGenerator<T> g(v);
-        Generate(begin, end, g);
+        nutty::base::Fill(begin, end, v);
     }
 }

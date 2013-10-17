@@ -59,7 +59,7 @@ namespace nutty
         Iterator<
                 T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
                 >& dst, 
-        Iterator<
+        const Iterator<
                 T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
                 >& src, 
         size_t d)
