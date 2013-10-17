@@ -79,10 +79,16 @@ namespace nutty
 
         template <
             typename T,
-            typename C,
             typename BinaryOperation
         >
-        void SortPerGroup(Iterator<T, C>& start, Iterator<T, C>& end, uint elementsPerBlock, uint startStage, uint startStep, uint length, BinaryOperation op)
+        void SortPerGroup(
+        Iterator<
+                T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+                >& start, 
+        Iterator<
+                T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>> 
+                >& end, 
+        uint elementsPerBlock, uint startStage, uint startStep, uint length, BinaryOperation op)
         {
             uint d = (uint)Distance(start, end);
             dim3 block = elementsPerBlock / 2; 
@@ -90,7 +96,7 @@ namespace nutty
 
             uint shrdMem = elementsPerBlock * sizeof(T);
 
-            nutty::cuda::bitonicMergeSortPerGroup<
+            bitonicMergeSortPerGroup<
                 T, 
                 BinaryOperation
             >
@@ -102,10 +108,13 @@ namespace nutty
 
         template<
             typename T, 
-            typename C,
             typename BinaryOperation
         >
-        void bitonicMergeSortStep(Iterator<T, C>& start, uint grid, uint block, uint stage, uint step, BinaryOperation op, uint offset = 0)
+        void SortStep(
+        Iterator<
+            T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+            >& start, 
+        uint grid, uint block, uint stage, uint step, BinaryOperation op, uint offset = 0)
         {
             bitonicMergeSortStep<            
                 T, 

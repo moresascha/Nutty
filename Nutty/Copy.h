@@ -14,9 +14,10 @@ namespace nutty
 
     template <
         typename T, 
-        typename C
+        typename C,
+        typename D
     >
-    void Copy(Iterator<T, C>& dst, Iterator<T, C>& src, size_t d)
+    void Copy(Iterator<T, C>& dst, Iterator<T, D>& src, size_t d)
     {
         nutty::base::Copy(dst, src, d);
     }

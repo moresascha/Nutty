@@ -23,7 +23,7 @@ int main(void)
     _CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
     _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
     _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
-#endif
+#endif 
 
     nutty::Init();
 
@@ -34,8 +34,6 @@ int main(void)
     nutty::ForEach(a.Begin(), a.End(), print);
 
     OutputDebugStringA("\n");
-
-    //nutty::Generate(b.Begin(), b.End(), rand);
 
     nutty::SortDescending(a);
 

@@ -10,26 +10,19 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
-                Iterator<T, Base_Buffer<T, DeviceContent<T>, CudaAllocator<T>>
-                        >& dst,
-                Iterator<T, Base_Buffer<T, HostContent<T>>
-                        >& src, 
-                        size_t d)
+        void Copy(Iterator<T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+        >& dst, Iterator<T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
+        >& src, size_t d)
         {
             nutty::cuda::Copy(dst(), src(), d, cudaMemcpyHostToDevice);
         }
 
-
         template <
             typename T
         >
-        void Copy(
-        Iterator<T, Base_Buffer<T, HostContent<T>>
-        >& dst,
-        Iterator<T, Base_Buffer<T, DeviceContent<T>, CudaAllocator<T>>
-        >& src,
-        size_t d)
+        void Copy(Iterator<T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
+        >& dst, Iterator<T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+        >& src, size_t d)
         {
             nutty::cuda::Copy(dst(), src(), d, cudaMemcpyDeviceToHost);
         }
@@ -37,12 +30,9 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
-        Iterator<T, Base_Buffer<T, DeviceContent<T>, CudaAllocator<T>>
-        >& dst,
-        Iterator<T, Base_Buffer<T, DeviceContent<T>, CudaAllocator<T>>
-        >& src,
-        size_t d)
+        void Copy(Iterator<T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+        >& dst, Iterator<T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+        >& src, size_t d)
         {
             nutty::cuda::Copy(dst(), src(), d, cudaMemcpyDeviceToDevice);
         }
@@ -50,12 +40,9 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
-        Iterator<T, Base_Buffer<T, HostContent<T>>
-        >& dst,
-        Iterator<T, Base_Buffer<T, HostContent<T>>
-        >& src,
-        size_t d)
+        void Copy(Iterator<T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
+        >& dst, Iterator<T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
+        >& src, size_t d)
         {
             memcpy(dst(), src(), d);
         }

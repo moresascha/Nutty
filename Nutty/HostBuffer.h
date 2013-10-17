@@ -5,7 +5,7 @@
 
 namespace nutty
 {
-    template<
+    template <
         typename T
     >
     class HostContent
@@ -50,7 +50,7 @@ namespace nutty
         }
     };
 
-    template<
+    template <
         typename T
     >
     class HostBuffer 
