@@ -125,6 +125,7 @@
     <CudaCompile Include="Nutty\testing\reduce.cu">
       <Filter>Header Files\test</Filter>
     </CudaCompile>
+    <CudaCompile Include="Nutty\testing\reduce_range.cu" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Nutty\cuda\Globals.cuh">

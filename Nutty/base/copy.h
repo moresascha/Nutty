@@ -14,7 +14,7 @@ namespace nutty
         Iterator<
                 T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
                 >& dst, 
-        Iterator<
+        const Iterator<
                 T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
                 >& src, 
         size_t d)
@@ -29,7 +29,7 @@ namespace nutty
         Iterator<
                 T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
                 >& dst, 
-        Iterator<
+        const Iterator<
                 T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
                 >& src, 
         size_t d)
@@ -44,7 +44,7 @@ namespace nutty
         Iterator<
                 T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
                 >& dst, 
-        Iterator<
+        const Iterator<
                 T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
                 >& src, 
         size_t d)
@@ -56,7 +56,7 @@ namespace nutty
             typename T
         >
         void Copy(
-        Iterator<
+        const Iterator<
                 T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
                 >& dst, 
         const T& v,

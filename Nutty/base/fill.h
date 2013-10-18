@@ -10,10 +10,10 @@ namespace nutty
             typename T
         >
         void Fill(        
-        Iterator<
+        const Iterator<
                 T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
                 >& begin, 
-        const Iterator<
+        Iterator<
                 T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
                 >& end,
                 const T& v)
@@ -33,14 +33,16 @@ namespace nutty
         >
         void Fill(        
         Iterator<
-        T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-        >& begin, 
+                T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+                >& begin, 
         const Iterator<
-        T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-        >& end,
+                T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+                >& end,
         const T& v)
         {
-            //nutty::cuda::Fill(begin(), end(), v); todo
+            size_t d = Distance(begin, end);
+            nutty::HostBuffer<T> host(d, v);
+            Copy(begin, host.Begin(), d);
         }
     }
 }

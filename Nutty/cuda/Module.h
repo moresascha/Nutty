@@ -1,5 +1,5 @@
 #pragma once
-#include "Inc.h"
+#include "../Inc.h"
 #include <fstream>
 namespace nutty
 {

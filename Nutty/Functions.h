@@ -7,6 +7,23 @@ namespace nutty
         template <
             typename T
         >
+        struct Sequence
+        {
+            T i;
+            Sequence(void) : i(0)
+            {
+
+            }
+
+            int operator()(void)
+            {
+                return i++;
+            }
+        };
+
+        template <
+            typename T
+        >
         struct Rand
         {
             __host__ T operator()(void)

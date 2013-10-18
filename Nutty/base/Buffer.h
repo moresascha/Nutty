@@ -108,6 +108,11 @@ namespace nutty
                 return operator[](it);
             }
 
+            pointer GetRawPointer(void)
+            {
+                return m_ptr;
+            }
+
             ~Base_Buffer(void)
             {
                 Clear();

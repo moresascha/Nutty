@@ -1,7 +1,7 @@
 #pragma once
-#include "Inc.h"
+#include "../Inc.h"
 #include "Stream.h"
-#include "DeviceBuffer.h"
+#include "../DeviceBuffer.h"
 
 namespace nutty
 {
@@ -46,7 +46,7 @@ namespace nutty
             m_argCount++;
 
             void** tmp = new void*[m_argCount];
-            for(UINT i = 0; i < m_argCount-1; ++i)
+            for(uint i = 0; i < m_argCount-1; ++i)
             {
                 tmp[i] = m_ppArgs[i];
             }

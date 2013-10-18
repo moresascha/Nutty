@@ -1,10 +1,12 @@
 #pragma once
 
-#define SAFE_DELETE(a) if( (a) != NULL ) delete (a); (a) = NULL;
-#define SAFE_ARRAY_DELETE(a) if( (a) != NULL ) delete[] (a); (a) = NULL;
+#ifndef SAFE_DELETE
+    #define SAFE_DELETE(a) if( (a) != NULL ) delete (a); (a) = NULL;
+#endif // !SAFE_DELETE
 
-#define TBD_FOR(__iterable) for(auto it = __iterable.begin(); it != __iterable.end(); ++it)
-#define TBD_FOR_INT(intVal) for(UINT i = 0; i < intVal; ++i)
+#ifndef SAFE_ARRAY_DELETE
+    #define SAFE_ARRAY_DELETE(a) if( (a) != NULL ) delete[] (a); (a) = NULL;
+#endif // !SAFE_ARRAY_DELETE
 
 #define PrintErrorString(message) \
     { \
@@ -36,12 +38,12 @@
         } \
     }
 
-#define LOG_CRITICAL_ERROR(__text) \
+#define PRINT_ERROR(__text) \
     { \
     PrintErrorString(__text);\
 }
 
-#define LOG_CRITICAL_ERROR_A(__pat, __text) \
+#define PRINT_ERROR_A(__pat, __text) \
     { \
     CHAR ___b[1024]; \
     ZeroMemory(___b, 1024); \
