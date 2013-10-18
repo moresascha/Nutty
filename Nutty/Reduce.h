@@ -36,4 +36,15 @@ namespace nutty
     {
         nutty::base::Reduce(data.Begin(), data.End(), op);
     }
+
+    template <
+        typename T,
+        typename C,
+        typename A,
+        typename BinaryOperation
+    >
+    T Reduce(BinaryOperation op, base::Base_Buffer<T, C, A>& data)
+    {
+        return nutty::base::Reduce(op, data.Begin(), data.End());
+    }
 }

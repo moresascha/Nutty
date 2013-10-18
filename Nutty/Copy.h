@@ -7,9 +7,27 @@ namespace nutty
         typename T, 
         typename C
     >
-    void Copy(Iterator<T, C>& srcStart, Iterator<T,C>& srcEnd, Iterator<T, C>& dstStart, Iterator<T, C>& dstEnd)
+    void Copy(Iterator<T, C>& dstBegin, Iterator<T, C>& dstEnd, Iterator<T, C>& srcBegin, Iterator<T,C>& srcEnd)
     {
 
+    }
+
+    template <
+        typename T, 
+        typename C
+    >
+    void Copy(Iterator<T, C>& begin, const T& t, size_t d)
+    {
+        nutty::base::Copy(begin, t, d);
+    }
+
+    template <
+        typename T, 
+        typename C
+    >
+    void Copy(Iterator<T, C>& begin, const T& t)
+    {
+        nutty::base::Copy(begin, t, 1);
     }
 
     template <

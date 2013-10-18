@@ -49,7 +49,7 @@ namespace nutty
             T_SRC d0 = data[memoryOffset + si];
             T_SRC d1 = data[memoryOffset + si + blockDim.x];
 
-            __reduce<T_DST*, T_SRC, T_DST*, BinaryOperator>(s_d, d0, d1, dst, _operator);
+            __reduce(s_d, d0, d1, dst, _operator);
         }
 
         /*

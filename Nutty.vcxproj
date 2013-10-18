@@ -89,6 +89,7 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
+      <CodeGeneration>compute_20,sm_20</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -126,11 +127,13 @@
     <ClInclude Include="Nutty\cuda\Array.h" />
     <ClInclude Include="Nutty\base\Buffer.h" />
     <ClInclude Include="Nutty\cuda\copy.h" />
+    <ClInclude Include="Nutty\cuda\fill.h" />
     <ClInclude Include="Nutty\cuda\reduce.h" />
     <ClInclude Include="Nutty\DeviceBuffer.h" />
     <ClInclude Include="Nutty\Copy.h" />
     <ClInclude Include="Nutty\base\copy.h" />
     <ClInclude Include="Nutty\cuda\sort.h" />
+    <ClInclude Include="Nutty\Functions.h" />
     <ClInclude Include="Nutty\HostBuffer.h" />
     <ClInclude Include="Nutty\inc\drvapi_error_string.h" />
     <ClInclude Include="Nutty\Nutty.h" />

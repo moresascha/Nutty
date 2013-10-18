@@ -28,7 +28,7 @@ namespace nutty
         >
         void Insert(Iterator<T, C>& pos, size_type d, const_type_reference v)
         {
-            Copy(pos, d, v);
+            Copy(pos, v, d);
         }
 
         template<

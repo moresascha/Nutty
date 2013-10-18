@@ -78,7 +78,7 @@ namespace nutty
 
     cuModule* GetModule(void);
 
-    void Destroy(void)
+    void Release(void)
     {
         if(g_CudaContext)
         {

@@ -111,6 +111,12 @@
     <ClInclude Include="Nutty\base\fill.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
+    <ClInclude Include="Nutty\Functions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Nutty\cuda\fill.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="Nutty\testing\sort.cu">

@@ -57,5 +57,24 @@ namespace nutty
 
             nutty::Copy(dstBegin, deviceDest.Begin(), dh);
         }
+
+        template <
+            typename T,
+            typename BinaryOperation
+        >
+        T Reduce(
+        BinaryOperation op,
+        Iterator<
+        T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+        >& begin, 
+        Iterator<
+        T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+        >& end
+        )
+        {
+            HostBuffer<T> host(1);
+            nutty::base::Reduce(host.Begin(), host.End(), begin, end, op);
+            return host[0];
+        }
     }
 }

@@ -57,6 +57,19 @@ namespace nutty
         >
         void Copy(
         Iterator<
+                T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+                >& dst, 
+        const T& v,
+        size_t d)
+        {
+            nutty::cuda::Copy(dst(), &v, d, cudaMemcpyHostToDevice);
+        }
+
+        template <
+            typename T
+        >
+        void Copy(
+        Iterator<
                 T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
                 >& dst, 
         const Iterator<

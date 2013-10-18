@@ -39,7 +39,7 @@ int main(void)
 
     nutty::ForEach(a.Begin(), a.End(), print);
 
-    nutty::Destroy();
+    nutty::Release();
 
     return 0;
 }
