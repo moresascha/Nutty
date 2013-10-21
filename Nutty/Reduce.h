@@ -5,6 +5,20 @@ namespace nutty
 {
     template <
         typename T,
+        typename T_ID,
+        typename C,
+        typename C1,
+        typename A,
+        typename A1,
+        typename BinaryOperation
+    >
+    void ReduceIndexed(base::Base_Buffer<T, C, A>& dst, base::Base_Buffer<T, C, A>& src, base::Base_Buffer<T_ID, C1, A1>& index, T& extreme, BinaryOperation op)
+    {
+        nutty::base::ReduceIndexed(dst.Begin(), src.Begin(), src.End(), index.Begin(), extreme, op);
+    }
+
+    template <
+        typename T,
         typename C,
         typename BinaryOperation
     >

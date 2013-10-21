@@ -52,25 +52,25 @@ namespace nutty
             __reduce(s_d, d0, d1, dst, _operator);
         }
 
-        /*
-        template <
-            typename _OPERATOR, 
-            typename _SRC_T, 
-            typename _DST_T
+        template< 
+            typename T_SRC, 
+            typename T_DST,
+            typename T_ID,
+            typename BinaryOperator
         >
-        __device__ void _reduceFromIndex(_SRC_T* data, _DST_T* dst, _OPERATOR _operator, uint* index, _SRC_T extremes, uint stride, uint memoryOffset)
+        __global__ void reduceIndexed(T_SRC* data, T_DST* dst, BinaryOperator _operator, T_ID* index, T_SRC extremes, uint invalidIndex, uint stride, uint memoryOffset)
         {
-            extern __shared__ _DST_T s_d[];
+            extern __shared__ T_DST s_d[];
 
             uint si = blockIdx.x * stride + threadIdx.x;
 
-            uint i0 = index[memoryOffset + si];
-            uint i1 = index[memoryOffset + si + blockDim.x];
+            T_ID i0 = index[memoryOffset + si];
+            T_ID i1 = index[memoryOffset + si + blockDim.x];
 
-            _SRC_T d0;
-            _SRC_T d1;
+            T_SRC d0;
+            T_SRC d1;
 
-            if(i0 == INVALID_DATA_ADD)
+            if(i0 == invalidIndex)
             {
                 d0 = extremes;
             }
@@ -79,7 +79,7 @@ namespace nutty
                 d0 = data[i0];
             }
 
-            if(i1 == INVALID_DATA_ADD)
+            if(i1 == invalidIndex)
             {
                 d1 = extremes;
             }
@@ -89,7 +89,41 @@ namespace nutty
             }
 
             __reduce(s_d, d0, d1, dst, _operator);
-        } */
+        }
+
+        template <
+            typename T,
+            typename T_ID,
+            typename BinaryOperation
+        >
+        void ReduceIndexed(T* dst, T* src, size_t d, T_ID* index, T_ID invalidIndex, T& extreme, BinaryOperation op)
+        {
+            uint elementsPerBlock = 512;
+
+            if(elementsPerBlock > d)
+            {
+                elementsPerBlock = (uint)d;
+            }
+
+            dim3 block = elementsPerBlock / 2; 
+            dim3 grid = (uint)((d / 2) / block.x);
+
+            reduceIndexed
+                <<<grid, block, block.x * 2 * sizeof(T)>>>
+                (src, dst, op, index, extreme, invalidIndex, elementsPerBlock, 0);
+
+            UINT elementsLeft = (uint)d / elementsPerBlock;
+
+            if(elementsLeft > 1)
+            {
+                block = elementsLeft / 2;
+                grid = (uint)((d / 2) / block.x);
+
+                reduceIndexed
+                    <<<grid, block, block.x * 2 * sizeof(T)>>>
+                    (dst, dst, op, index, extreme, invalidIndex, elementsLeft / 2, 0);
+            }
+        }
 
         template <
             typename T,
@@ -108,8 +142,8 @@ namespace nutty
             dim3 grid = (uint)((d / 2) / block.x);
 
             reduce
-            <<<grid, block, block.x * 2 * sizeof(T)>>>
-            (src, dst, op, elementsPerBlock, 0);
+                <<<grid, block, block.x * 2 * sizeof(T)>>>
+                (src, dst, op, elementsPerBlock, 0);
 
             UINT elementsLeft = (uint)d / elementsPerBlock;
 

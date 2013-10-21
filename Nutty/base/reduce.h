@@ -10,6 +10,32 @@ namespace nutty
     {
         template <
             typename T,
+            typename T_ID,
+            typename BinaryOperation
+        >
+        void ReduceIndexed(
+        Iterator<
+        T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+        >& dstBegin,
+        Iterator<
+        T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+        >& srcBegin, 
+        Iterator<
+        T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+        >& srcEnd,
+        Iterator<
+        T_ID, nutty::base::Base_Buffer<T_ID, nutty::DeviceContent<T_ID>, nutty::CudaAllocator<T_ID>>
+        >& indexBegin,
+        T& extreme,
+        BinaryOperation op)
+        {
+            size_t d = Distance(srcBegin, srcEnd);
+
+            nutty::cuda::ReduceIndexed(dstBegin(), srcBegin(), d, indexBegin(), (uint)(-1), extreme, op);
+        }
+
+        template <
+            typename T,
             typename BinaryOperation
         >
         void Reduce(

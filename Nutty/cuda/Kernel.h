@@ -14,16 +14,22 @@ namespace nutty
         dim3 m_gridDim;
         dim3 m_blockDim;
         uint m_shrdMemBytes;
-        void** m_ppExtras;
-        void** m_ppArgs;
+        void* m_ppExtras[32]; //max 32 arguments
+        void* m_ppArgs[32];
 
     public:
-        cuKernel(CUfunction function) : m_fpCuda(function), m_shrdMemBytes(0), m_ppExtras(NULL), m_ppArgs(NULL), m_argCount(0)
+        cuKernel(CUfunction function) : m_fpCuda(function), m_shrdMemBytes(0), m_argCount(0)
         {
-
+            memset(m_ppArgs, 0, 32 * sizeof(void*));
+            memset(m_ppExtras, 0, 32 * sizeof(void*));
         }
 
-        void SetDimention(const dim3& grid, const dim3& block)
+        void SetSharedMemory(uint bytes)
+        {
+            m_shrdMemBytes = bytes;
+        }
+
+        void SetDimension(const dim3& grid, const dim3& block)
         {
             m_gridDim = grid;
             m_blockDim = block;
@@ -32,20 +38,23 @@ namespace nutty
         template<
             typename T
         >
-        void SetKernelArg(uint index, T* ptr)
+        void SetKernelArg(uint index, T& ptr)
         {
+            m_ppArgs[index] = &ptr;
+                /*
 #ifdef _DEBUG
             assert(index <= m_argCount);
 #endif
-            if(m_ppArgs && index < m_argCount)
+            if(index < m_argCount)
             {
-                m_ppArgs[index] = ptr;
+                
                 return;
             }
 
             m_argCount++;
-
+        
             void** tmp = new void*[m_argCount];
+
             for(uint i = 0; i < m_argCount-1; ++i)
             {
                 tmp[i] = m_ppArgs[i];
@@ -58,28 +67,21 @@ namespace nutty
                 delete[] m_ppArgs;
             }
 
-            m_ppArgs = tmp;
-        }
-
-        template<
-            typename T
-        >
-        void SetKernelArg(uint index, T& arg)
-        {
-            SetKernelArg(index, &arg);
+            m_ppArgs = tmp; */
         }
 
         template< 
             typename T
         >
-        void SetKernelArg(uint index, DeviceBuffer<T>& arg)
+        void SetKernelArg(uint index, nutty::DeviceBuffer<T>& arg)
         {
-            SetKernelArg(index, &arg->Begin()());
+            CUdeviceptr* ptr = (CUdeviceptr*)arg.GetRawPointerPointer();
+            m_ppArgs[index] = ptr;
         }
 
         void Call(CUstream stream = NULL)
         {
-            CUDA_DRIVER_SAFE_CALLING_NO_SYNC(
+            CUDA_DRIVER_SAFE_CALLING_SYNC(
                 cuLaunchKernel(
                 m_fpCuda, 
                 m_gridDim.x, m_gridDim.y, m_gridDim.z, 
@@ -90,15 +92,6 @@ namespace nutty
 
         ~cuKernel(void)
         {
-            if(m_ppArgs)
-            {
-                delete[] m_ppArgs;
-            }
-
-            if(m_ppExtras)
-            {
-                delete[] m_ppExtras;
-            }
         }
     };
 }

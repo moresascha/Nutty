@@ -7,6 +7,21 @@
 
 #define GlobalId (blockDim.x * blockIdx.x + threadIdx.x)
 
+template <
+    typename K,
+    typename V
+    >
+struct KVPair
+{
+    __device__ KVPair(K _k, V _v) : k(_k), v(_v)
+    {
+
+    }
+
+    K k;
+    V v;
+};
+
 template<typename T>
 struct ShrdMemory
 {
@@ -16,6 +31,16 @@ struct ShrdMemory
     { 
         error(); 
         return 0;
+    }
+};
+
+template< template <typename, typename> class KVPair, class K, class V>
+struct ShrdMemory<KVPair<K, V>>
+{
+    __device__ KVPair<K, V>* Ptr(void) 
+    { 
+        extern __device__ __shared__ KVPair<K, V> s_kv[];
+        return s_kv;
     }
 };
 

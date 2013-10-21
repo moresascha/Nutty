@@ -13,7 +13,35 @@ namespace nutty
         >
         class Base_Buffer
         {
+        private:
+            Base_Buffer(const Base_Buffer& c) { } //don't copy it
+
         public:
+
+            Base_Buffer(Base_Buffer&& c) : m_ptr(NULL), m_size(0)
+            {
+                m_ptr = c.m_ptr;
+                m_size = c.m_size;
+
+                c.m_ptr = NULL;
+                c.m_size = 0;
+            }
+
+            Base_Buffer& operator=(Base_Buffer&& c)
+            {
+                if(this != &c)
+                {
+                    Clear();
+
+                    m_ptr = c.m_ptr;
+                    m_size = c.m_size;
+                    
+                    c.m_ptr = NULL;
+                    c.m_size = 0;
+                }
+
+                return *this;
+            }
 
             typedef T* pointer;
             typedef const T& const_type_reference;
@@ -25,7 +53,7 @@ namespace nutty
             Base_Buffer(void)
             {
                 m_size = 0;
-                m_ptr = 0;
+                m_ptr = NULL;
             }
 
             Base_Buffer(size_type n)
@@ -82,7 +110,12 @@ namespace nutty
                     m_alloc.Deallocate(m_ptr);
                 }
                 m_size = 0;
-                m_ptr = 0;
+                m_ptr = NULL;
+            }
+
+            size_type Size(void)
+            {
+                return m_size;
             }
 
             void Insert(iterator pos, const_type_reference v)
@@ -111,6 +144,11 @@ namespace nutty
             pointer GetRawPointer(void)
             {
                 return m_ptr;
+            }
+
+            pointer* GetRawPointerPointer(void)
+            {
+                return &m_ptr;
             }
 
             ~Base_Buffer(void)

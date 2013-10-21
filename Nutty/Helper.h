@@ -28,13 +28,8 @@
         dest += inLine + "Line: " + l; \
         dest += "\n"; \
         int id = IDABORT;\
-        if(IDABORT == id)\
-        {\
+        OutputDebugStringA(dest.c_str()); \
         DebugBreak();\
-        }\
-        else\
-        {\
-        exit(-1);\
         } \
     }
 
