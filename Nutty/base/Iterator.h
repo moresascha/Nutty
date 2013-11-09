@@ -140,7 +140,7 @@ namespace nutty
         typename T,
         typename Container
     >
-    Iterator<T, Container> operator+(Iterator<T, Container>& i0, Iterator<T, Container>::size_type i)
+    Iterator<T, Container> operator+(Iterator<T, Container>& i0, typename Iterator<T, Container>::size_type i)
     {
         T* p = i0.m_ptr + i;
         Iterator<T, Container> it(p, i0.m_container);
@@ -151,7 +151,7 @@ namespace nutty
         typename T, 
         typename Container
     >
-    Iterator<T, Container> operator-(Iterator<T, Container>& i0, Iterator<T, Container>::size_type i)
+    Iterator<T, Container> operator-(Iterator<T, Container>& i0, typename Iterator<T, Container>::size_type i)
     {
         T* p = i0.m_ptr - i;
         Iterator<T, Container> it(p, i0.m_container);

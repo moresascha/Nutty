@@ -1,46 +1,185 @@
 #pragma once
 #include "Globals.cuh"
+#include "cuda_helper.h"
 
 namespace nutty
 {
     namespace cuda
     {
-        //key value sort
-
+        /************************************************************************/
+        /* VALUE SORT                                                           */
+        /************************************************************************/
         template <
-            template <typename, typename> class KVPair, class K, class V,
+            typename T, 
             typename BinaryOperation
         >
-        __device__ void __bitonicMergeSortKeyStep(KVPair<K, V>* kv, uint stage, uint step, uint id, BinaryOperation _cmp_func, uint offset = 0)
+        __device__ char __cmp(T t0, T t1, BinaryOperation _op, uint stage)
         {
-            uint first = (step << 1) * (id / step);
-            uint second = first + step;
+            char dir = (((2 * GlobalId ) / stage) & 1);
+            char cmp = _op(t0, t1);
+            return (!dir & cmp) | (dir & !cmp);
+        }
 
-            uint bankOffset = (id % step);
+        template <
+            typename T, 
+            typename BinaryOperation
+        >
+        __device__ void __bitonicMergeSortStep(T* v, uint stage, uint step, uint tid, uint length, BinaryOperation _cmp_func, uint offset = 0)
+        {
+            uint first = (step << 1) * (tid / step);
+            uint second = first + step;
+            
+            uint bankOffset = (tid % step);
             char isBankOffset = bankOffset > 0;
 
             first += bankOffset * isBankOffset;
             second += bankOffset * isBankOffset;
 
-            KVPair<K, V> kv0 = kv[offset + first];
-            KVPair<K, V> kv1 = kv[offset + second];
+            uint gsecond = (step << 1) * (GlobalId / step) + step;
+            gsecond += bankOffset * isBankOffset;
+            
+            uint start = (step<<1) * (GlobalId/(step));
 
-            char dir = (((2 * GlobalId ) / stage) & 1);  //order & ((((2 * id ) / stage) & 1) + 1);
-            char cmp = _cmp_func(kv0.v, kv1.v);
-
-            if((!dir & cmp) | (dir & !cmp))
+            if(start + (step<<1) > length)
             {
-                kv[offset + first].k = kv1.k;
-                kv[offset + second].k = kv0.k;
+                char dir = (((2 * GlobalId ) / stage) & 1);
+                if(!dir && stage == (step<<1))
+                {
+                    first += (step<<1) - (length%(step<<1));
+                }
+            }
+
+            if(offset + gsecond < length)
+            {
+                T n0 = v[offset + first];
+
+                T n1 = v[offset + second];
+
+                if(__cmp(n0, n1, _cmp_func, stage))
+                {
+                    v[offset + second] = n0;
+                    v[offset + first] = n1;
+                }
             }
         }
+
+        template <
+            typename T, 
+            typename BinaryOperation
+        >
+        __global__ void bitonicMergeSortStep(T* v, uint stage, uint step, uint length, BinaryOperation _cmp_func, uint offset = 0)
+        {
+            __bitonicMergeSortStep(v, stage, step, GlobalId, length, _cmp_func, offset);
+        }
+
+        template <
+            typename T, 
+            typename BinaryOperation
+        >
+        __global__ void bitonicMergeSortPerGroup(T* g_values, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation _cmp_func)
+        {
+            uint tId = threadIdx.x;
+            uint i = 2 * GlobalId;
+
+            if(i >= length)
+            {
+                return;
+            }
+
+            ShrdMemory<T> shrdMem;
+            T* shrd = shrdMem.Ptr();
+
+            shrd[2 * tId + 0] = g_values[i + 0];
+
+            if(i+1 < length)
+            {
+                shrd[2 * tId + 1] = g_values[i + 1];
+            }
+            
+            uint step = startStep;
+          
+            for(uint stage = startStage; stage <= endStage;)
+            {
+                for(;step > 0; step = step >> 1)
+                {
+                    __syncthreads();
+                    __bitonicMergeSortStep(shrd, stage, step, tId, length, _cmp_func);
+                }
+
+                stage <<= 1;
+                step = stage >> 1;
+            }
+
+            g_values[i + 0] = shrd[2 * tId + 0];
+
+            if(i+1 < length)
+            {
+                g_values[i + 1] = shrd[2 * tId + 1];
+            }
+        }
+
+        template <
+            typename T,
+            typename BinaryOperation
+        >
+        void SortPerGroup(
+        Iterator<
+            T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+            >& valuesBegin, 
+        Iterator<
+            T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>> 
+            >& valuesEnd, 
+        uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
+        {
+            dim3 block = (elementsPerBlock + elementsPerBlock%2)/2;//1 << nutty::getmsb((elementsPerBlock + (elementsPerBlock%2))/2);
+            dim3 grid = getCudaGrid(length, elementsPerBlock);
+
+            uint shrdMem = elementsPerBlock * sizeof(T);
+
+            bitonicMergeSortPerGroup
+                <<<grid, block, shrdMem>>>
+                (
+                valuesBegin(), startStage, endStage, startStep, length, op
+                );
+        }
+
+        template <
+            typename T,
+            typename BinaryOperation
+        >
+        void SortStep(
+        Iterator<
+            T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+            >& values, 
+        uint grid, uint block, uint stage, uint step, uint length, BinaryOperation op, uint offset = 0)
+        {
+            bitonicMergeSortStep
+                <<<grid, block>>>
+                (
+                values(), stage, step, length, op, offset
+                );
+        }
+
+        /************************************************************************/
+        /* KEY VALUE SORT                                                       */
+        /************************************************************************/
+                /*
+        template <
+        template <typename, typename> class KVPair, class K, class V,
+        typename BinaryOperation
+        >
+        __device__ void __bitonicMergeSortKeyStep(KVPair<K, V>* kv, uint stage, uint step, uint id, BinaryOperation _cmp_func, uint offset = 0)
+        {
+
+        }
+        */
 
         template <
             typename V,
             typename K,
             typename BinaryOperation
         >
-        __device__ void __bitonicMergeSortKeyStep(V* v, K* k, uint stage, uint step, uint id, BinaryOperation _cmp_func, uint offset = 0)
+        __device__ void __bitonicMergeSortKeyStep(V* v, K* k, uint stage, uint step, uint id, uint length, BinaryOperation _cmp_func, uint offset = 0)
         {
             uint first = (step << 1) * (id / step);
             uint second = first + step;
@@ -51,19 +190,37 @@ namespace nutty
             first += bankOffset * isBankOffset;
             second += bankOffset * isBankOffset;
 
-            K k0 = k[offset + first];
-            K k1 = k[offset + second];
+            uint gsecond = (step << 1) * (GlobalId / step) + step;
+            gsecond += bankOffset * isBankOffset;
 
-            V v0 = v[k0];
-            V v1 = v[k1];
+            uint start = (step<<1) * (GlobalId/(step));
 
-            char dir = (((2 * GlobalId ) / stage) & 1);  //order & ((((2 * id ) / stage) & 1) + 1);
-            char cmp = _cmp_func(v0, v1);
-
-            if((!dir & cmp) | (dir & !cmp))
+            if(start + (step<<1) > length)
             {
-                k[offset + first] = k1;
-                k[offset + second] = k0;
+                char dir = (((2 * GlobalId ) / stage) & 1);
+                if(!dir && stage == (step<<1))
+                {
+                    first += (step<<1) - (length%(step<<1));
+                }
+            }
+
+            if(offset + gsecond < length)
+            {
+                K k0 = k[offset + first];
+
+                K k1 = k[offset + second];
+
+                V v0 = v[k0];
+
+                V v1 = v[k1];
+
+                if(__cmp(v0, v1, _cmp_func, stage))
+                {
+                    k[offset + first] = k1;
+                    k[offset + second] = k0;
+                    /*v[offset + first] = v1;
+                    v[offset + second] = v0;*/
+                }
             }
         }
 
@@ -72,7 +229,7 @@ namespace nutty
             typename K,
             typename BinaryOperation
         >
-        __global__ void bitonicMergeSortStep(T* v, K* k, uint stage, uint step, BinaryOperation _cmp_func, uint offset = 0)
+        __global__ void bitonicMergeSortKeyStep(T* v, K* k, uint stage, uint step, BinaryOperation _cmp_func, uint offset = 0)
         {
             __bitonicMergeSortKeyStep(v, k, stage, step, GlobalId, _cmp_func, offset);
         }
@@ -82,39 +239,50 @@ namespace nutty
             typename K,
             typename BinaryOperation
         >
-        __global__ void bitonicMergeSortKeyPerGroup(T* v, K* key, uint startStage, uint startStep, uint length, BinaryOperation _cmp_func)
+        __global__ void bitonicMergeSortKeyPerGroup(T* v, K* k, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation _cmp_func)
         {
-            //char order = blockIdx.x % 2 + 1;
             uint tId = threadIdx.x;
-            uint elementsPerBlock = 2 * blockDim.x;
-            uint i = blockIdx.x * elementsPerBlock + 2 * tId;
+            uint i = 2 * GlobalId;
 
-            ShrdMemory<KVPair<K, T>> shrdMem;
+            if(i >= length)
+            {
+                return;
+            }
+
+            /*ShrdMemory<KVPair<K, T>> shrdMem;
             KVPair<K, T>* shrd = shrdMem.Ptr();
 
             K k0 = key[i + 0];
-            K k1 = key[i + 1];
             T v0 = v[k0];
-            T v1 = v[k1];
 
             shrd[2 * tId + 0] = KVPair<K, T>(k0, v0);
-            shrd[2 * tId + 1] = KVPair<K, T>(k1, v1);
+            if(i+1 < length)
+            {
+                K k1 = key[i + 1];
+                T v1 = v[k1];
+                shrd[2 * tId + 1] = KVPair<K, T>(k1, v1);
+            }*/
 
             uint step = startStep;
 
-            for(uint stage = startStage; stage <= length;)
+            for(uint stage = startStage; stage <= endStage;)
             {
                 for(;step > 0; step = step >> 1)
                 {
                     __syncthreads();
-                    __bitonicMergeSortKeyStep(shrd, stage, step, tId, _cmp_func);
+                    __bitonicMergeSortKeyStep(v, k, stage, step, tId, length, _cmp_func);
                 }
                 stage <<= 1;
                 step = stage >> 1;
             }
 
-            key[i + 0] = shrd[2 * tId + 0].k;
-            key[i + 1] = shrd[2 * tId + 1].k;
+            /*key[i + 0] = shrd[2 * tId + 0].k;
+            v[i + 0] = shrd[2 * tId + 0].v;
+            if(i+1 < length)
+            {
+                key[i + 1] = shrd[2 * tId + 1].k;
+                v[i + 1] = shrd[2 * tId + 1].v;
+            }*/
         }
 
         template <
@@ -124,26 +292,25 @@ namespace nutty
         >
         void SortKeyPerGroup(
         Iterator<
-                K, nutty::base::Base_Buffer<K, nutty::DeviceContent<K>, nutty::CudaAllocator<K>>
-                >& keyBegin, 
+            K, nutty::base::Base_Buffer<K, nutty::DeviceContent<K>, nutty::CudaAllocator<K>>
+            >& keyBegin, 
         Iterator<
-                K, nutty::base::Base_Buffer<K, nutty::DeviceContent<K>, nutty::CudaAllocator<K>> 
-                >& keyEnd, 
+            K, nutty::base::Base_Buffer<K, nutty::DeviceContent<K>, nutty::CudaAllocator<K>> 
+            >& keyEnd, 
         Iterator<
-                T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-                >& values, 
-        uint elementsPerBlock, uint startStage, uint startStep, uint length, BinaryOperation op)
+            T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
+            >& values, 
+        uint elementsPerBlock, uint startStage, uint endstage, uint startStep, uint length, BinaryOperation op)
         {
-            uint d = (uint)Distance(keyBegin, keyEnd);
-            dim3 block = elementsPerBlock / 2; 
-            dim3 grid = (d / 2) / block.x;
+            dim3 block = (elementsPerBlock + elementsPerBlock%2)/2;
+            dim3 grid = getCudaGrid(length, elementsPerBlock);
 
-            uint shrdMem = elementsPerBlock * sizeof(KVPair<K,T>);
+            uint shrdMem = 0;//elementsPerBlock * sizeof(KVPair<K,T>);
 
             bitonicMergeSortKeyPerGroup
                 <<<grid, block, shrdMem>>>
                 (
-                values(), keyBegin(), startStage, startStep, length, op
+                values(), keyBegin(), startStage, endstage, startStep, length, op
                 );
         }
 
@@ -154,133 +321,16 @@ namespace nutty
         >
         void SortKeyStep(
         Iterator<
-                K, nutty::base::Base_Buffer<K, nutty::DeviceContent<K>, nutty::CudaAllocator<K>>
-                >& keys, 
-        Iterator<
-                T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-                >& values, 
-        uint grid, uint block, uint stage, uint step, BinaryOperation op, uint offset = 0)
-        {
-            bitonicMergeSortStep<<<grid, block>>>
-            (
-            values(), keys(), stage, step, op
-            );
-        }
-
-        //value sort
-
-        template <
-            typename T, 
-            typename BinaryOperation
-        >
-        __device__ void __bitonicMergeSortStep(T* v, uint stage, uint step, uint id, BinaryOperation _cmp_func, uint offset = 0)
-        {
-            uint first = (step << 1) * (id / step);
-            uint second = first + step;
-
-            uint bankOffset = (id % step);
-            char isBankOffset = bankOffset > 0;
-
-            first += bankOffset * isBankOffset;
-            second += bankOffset * isBankOffset;
-
-            T n0 = v[offset + first];
-
-            T n1 = v[offset + second];
-
-            char dir = (((2 * GlobalId ) / stage) & 1);  //order & ((((2 * id ) / stage) & 1) + 1);
-            char cmp = _cmp_func(n0, n1);
-
-            if((!dir & cmp) | (dir & !cmp))
-            {
-                v[offset + first] = n1;
-                v[offset + second] = n0;
-            }
-        }
-
-        template <
-            typename T, 
-            typename BinaryOperation
-        >
-        __global__ void bitonicMergeSortStep(T* v, uint stage, uint step, BinaryOperation _cmp_func, uint offset = 0)
-        {
-            __bitonicMergeSortStep(v, stage, step, GlobalId, _cmp_func, offset);
-        }
-
-        template <
-            typename T, 
-            typename BinaryOperation
-        >
-        __global__ void bitonicMergeSortPerGroup(T* g_values, uint startStage, uint startStep, uint length, BinaryOperation _cmp_func)
-        {
-            //char order = blockIdx.x % 2 + 1;
-            uint tId = threadIdx.x;
-            uint elementsPerBlock = 2 * blockDim.x;
-            uint i = blockIdx.x * elementsPerBlock + 2 * tId;
-
-            ShrdMemory<T> shrdMem;
-            T* shrd = shrdMem.Ptr();
-
-            shrd[2 * tId + 0] = g_values[i + 0];
-            shrd[2 * tId + 1] = g_values[i + 1];
-
-            uint step = startStep;
-
-            for(uint stage = startStage; stage <= length;)
-            {
-                for(;step > 0; step = step >> 1)
-                {
-                    __syncthreads();
-                    __bitonicMergeSortStep(shrd, stage, step, tId, _cmp_func);
-                }
-                stage <<= 1;
-                step = stage >> 1;
-            }
-
-            g_values[i + 0] = shrd[2 * tId + 0];
-            g_values[i + 1] = shrd[2 * tId + 1];
-        }
-
-        template <
-            typename T,
-            typename BinaryOperation
-        >
-        void SortPerGroup(
-        Iterator<
-        T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-        >& valuesBegin, 
-        Iterator<
-        T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>> 
-        >& valuesEnd, 
-        uint elementsPerBlock, uint startStage, uint startStep, uint length, BinaryOperation op)
-        {
-            uint d = (uint)Distance(valuesBegin, valuesEnd);
-            dim3 block = elementsPerBlock / 2; 
-            dim3 grid = (d / 2) / block.x;
-
-            uint shrdMem = elementsPerBlock * sizeof(T);
-
-            bitonicMergeSortPerGroup
-                <<<grid, block, shrdMem>>>
-                (
-                valuesBegin(),startStage, startStep, length, op
-                );
-        }
-
-        template <
-            typename T,
-            typename BinaryOperation
-        >
-        void SortStep(
+        K, nutty::base::Base_Buffer<K, nutty::DeviceContent<K>, nutty::CudaAllocator<K>>
+        >& keys, 
         Iterator<
         T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
         >& values, 
         uint grid, uint block, uint stage, uint step, BinaryOperation op, uint offset = 0)
         {
-            __bitonicMergeSortStep
-                <<<grid, block>>>
+            bitonicMergeSortKeyStep<<<grid, block>>>
                 (
-                values(), stage, step, op
+                values(), keys(), stage, step, op
                 );
         }
     }

@@ -113,7 +113,7 @@ namespace nutty
                 m_ptr = NULL;
             }
 
-            size_type Size(void)
+            size_type Size(void) const
             {
                 return m_size;
             }
@@ -126,6 +126,11 @@ namespace nutty
             void Insert(iterator start, iterator end, const_type_reference v)
             {
                 m_content.Insert(start, end, v);
+            }
+
+            void Insert(size_type pos, const_type_reference v)
+            {
+                Insert(Begin() + pos, v);
             }
 
             T operator[](iterator it)

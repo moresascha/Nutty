@@ -127,6 +127,7 @@
     <ClInclude Include="Nutty\cuda\Array.h" />
     <ClInclude Include="Nutty\base\Buffer.h" />
     <ClInclude Include="Nutty\cuda\copy.h" />
+    <ClInclude Include="Nutty\cuda\cuda_helper.h" />
     <ClInclude Include="Nutty\cuda\fill.h" />
     <ClInclude Include="Nutty\cuda\reduce.h" />
     <ClInclude Include="Nutty\DeviceBuffer.h" />
@@ -147,6 +148,7 @@
     <ClInclude Include="Nutty\cuda\Module.h" />
     <ClInclude Include="Nutty\cuda\Record.h" />
     <ClInclude Include="Nutty\Reduce.h" />
+    <ClInclude Include="Nutty\Scan.h" />
     <ClInclude Include="Nutty\Sort.h" />
     <ClInclude Include="Nutty\cuda\Stream.h" />
   </ItemGroup>
@@ -155,7 +157,12 @@
       <CodeGeneration Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">compute_20,sm_20</CodeGeneration>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </CudaCompile>
-    <CudaCompile Include="Nutty\testing\reduce_range.cu" />
+    <CudaCompile Include="Nutty\testing\reduce_range.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="Nutty\testing\scan.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </CudaCompile>
     <CudaCompile Include="Nutty\testing\sort.cu">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </CudaCompile>

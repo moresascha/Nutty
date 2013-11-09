@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Inc.h"
 
 namespace nutty

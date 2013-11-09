@@ -40,9 +40,9 @@ namespace nutty
         Iterator<
                 T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
                 >& end, 
-        uint elementsPerBlock, uint startStage, uint startStep, uint length, BinaryOperation op)
+        uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
         {
-            nutty::cuda::SortPerGroup(start, end, elementsPerBlock, startStage, startStep, length, op);
+            nutty::cuda::SortPerGroup(start, end, elementsPerBlock, startStage, endStage, startStep, length, op);
         }
 
         template<
@@ -50,9 +50,9 @@ namespace nutty
             typename BinaryOperation
         >
         void SortStep(Iterator<T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-        >& start, uint grid, uint block, uint stage, uint step, BinaryOperation op, uint offset = 0)
+        >& start, uint grid, uint block, uint stage, uint step, uint length, BinaryOperation op, uint offset = 0)
         {
-            nutty::cuda::SortStep(start, grid, block, stage, step, op, offset);
+            nutty::cuda::SortStep(start, grid, block, stage, step, length, op, offset);
         }
 
         template <
@@ -68,47 +68,54 @@ namespace nutty
 
             const uint maxElemsBlock = 512;
 
-            uint maxElemsPerBlock = maxElemsBlock;
+            uint elemsPerBlock = maxElemsBlock;
 
-            if(elemCount >= maxElemsPerBlock)
+            if(elemCount >= elemsPerBlock)
             {
-                elemCount = maxElemsPerBlock;
+                elemCount = elemsPerBlock;
             }
             else
             {
-                maxElemsPerBlock = elemCount;
+                elemsPerBlock = elemCount;
             }
 
-            SortPerGroup(start, end, elemCount, 2, 1, maxElemsPerBlock, op);
+            uint perGroupEndStage = elemsPerBlock;
+            if(elemsPerBlock & (elemsPerBlock-1))
+            {
+                perGroupEndStage = 1 << (getmsb(elemsPerBlock) + 1);
+            }
+
+            SortPerGroup(start, end, elemsPerBlock, 2, perGroupEndStage, 1, length, op);
 
             elemCount = length;
-            maxElemsPerBlock = maxElemsBlock;
+            elemsPerBlock = maxElemsBlock;
 
-            if(elemCount <= maxElemsPerBlock)
+            if(elemCount <= elemsPerBlock)
             {
                 return;
             }
 
-            uint blockSize = maxElemsBlock / 2;
+            uint stageStart = elemsPerBlock << 1;
+            uint grid = cuda::getCudaGrid(length, elemsPerBlock);
 
-            dim3 block;
-            dim3 grid;
+            uint endStage = length;
+            if(length & (length-1))
+            {
+                endStage = 1 << (getmsb(length) + 1);
+            }
 
-            block.x = blockSize;
-            grid.x = (length / 2) / block.x;
-
-            for(uint pow2stage = maxElemsPerBlock << 1; pow2stage <= length; pow2stage <<= 1)
+            for(uint pow2stage = stageStart; pow2stage <= endStage; pow2stage <<= 1)
             {
                 for(uint step = pow2stage >> 1; step > 0; step = step >> 1)
                 {
-                    if((step << 1) <= maxElemsPerBlock)
+                    if((step << 1) <= elemsPerBlock)
                     {
-                        SortPerGroup(start, end, maxElemsPerBlock, pow2stage, step, pow2stage, op);
+                        SortPerGroup(start, end, elemsPerBlock, pow2stage, pow2stage, step, length, op);
                         break;
                     }
                     else
                     {
-                        SortStep(start, block.x, grid.x, pow2stage, step, op);
+                        SortStep(start, grid, elemsPerBlock, pow2stage, step, length, op);
                     }
                 }
             }
@@ -116,7 +123,7 @@ namespace nutty
 
         //key value
 
-        template <
+        /*template <
             typename K,
             typename T,
             typename BinaryOperation
@@ -131,10 +138,10 @@ namespace nutty
         Iterator<
                 T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
                 >& values, 
-        uint elementsPerBlock, uint startStage, uint startStep, uint length, BinaryOperation op)
+        uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
         {
-            nutty::cuda::SortKeyPerGroup(keyBegin, keyEnd, values, elementsPerBlock, startStage, startStep, length, op);
-        }
+            nutty::cuda::SortKeyPerGroup(keyBegin, keyEnd, values, elementsPerBlock, startStage, endStage, startStep, length, op);
+        }*/
 
         template <
             typename K,
@@ -168,50 +175,58 @@ namespace nutty
 
             const uint maxElemsBlock = 512;
 
-            uint maxElemsPerBlock = maxElemsBlock;
+            uint elemsPerBlock = maxElemsBlock;
 
-            if(elemCount >= maxElemsPerBlock)
+            if(elemCount >= elemsPerBlock)
             {
-                elemCount = maxElemsPerBlock;
+                elemCount = elemsPerBlock;
             }
             else
             {
-                maxElemsPerBlock = elemCount;
+                elemsPerBlock = elemCount;
             }
 
-            SortKeyPerGroup(keyStart, keyEnd, valuesBegin, elemCount, 2, 1, maxElemsPerBlock, op);
+            uint perGroupEndStage = elemsPerBlock;
+            if(elemsPerBlock & (elemsPerBlock-1))
+            {
+                perGroupEndStage = 1 << (getmsb(elemsPerBlock) + 1);
+            }
+
+            nutty::cuda::SortKeyPerGroup(keyStart, keyEnd, valuesBegin, elemsPerBlock, 2, perGroupEndStage, 1, length, op);
 
             elemCount = length;
-            maxElemsPerBlock = maxElemsBlock;
+            elemsPerBlock = maxElemsBlock;
 
-            if(elemCount <= maxElemsPerBlock)
+            if(elemCount <= elemsPerBlock)
             {
                 return;
             }
+            /*
+            uint stageStart = elemsPerBlock << 1;
+            uint grid = cuda::getCudaGrid(length, elemsPerBlock);
 
-            uint blockSize = maxElemsBlock / 2;
+            uint endStage = length;
+            if(length & (length-1))
+            {
+                endStage = 1 << (getmsb(length) + 1);
+            }
 
-            dim3 block;
-            dim3 grid;
-
-            block.x = blockSize;
-            grid.x = (length / 2) / block.x;
-
-            for(uint pow2stage = maxElemsPerBlock << 1; pow2stage <= length; pow2stage <<= 1)
+            for(uint pow2stage = stageStart; pow2stage <= endStage; pow2stage <<= 1)
             {
                 for(uint step = pow2stage >> 1; step > 0; step = step >> 1)
                 {
-                    if((step << 1) <= maxElemsPerBlock)
+                    if((step << 1) <= elemsPerBlock)
                     {
-                        SortKeyPerGroup(keyStart, keyEnd, valuesBegin, maxElemsPerBlock, pow2stage, step, pow2stage, op);
+                        SortKeyPerGroup(start, end, elemsPerBlock, pow2stage, pow2stage, step, length, op);
                         break;
                     }
                     else
                     {
-                        SortKeyStep(keyStart, valuesBegin, block.x, grid.x, pow2stage, step, op);
+                        SortKeyStep(start, grid, elemsPerBlock, pow2stage, step, length, op);
                     }
                 }
             }
+            */
         }
     }
 }

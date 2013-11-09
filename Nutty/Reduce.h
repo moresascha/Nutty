@@ -29,6 +29,19 @@ namespace nutty
 
     template <
         typename T,
+        typename C,
+        typename A,
+        typename T0,
+        typename C0,
+        typename BinaryOperation
+    >
+    void Reduce(Iterator<T, C>& dstBegin, Iterator<T, C>& dstEnd, base::Base_Buffer<T0, C0, A>& src, BinaryOperation op)//,  BinaryOperation op)
+    {
+        nutty::base::Reduce(dstBegin, dstEnd, src.Begin(), src.End(), op);
+    }
+
+    template <
+        typename T,
         typename C0,
         typename C1,
         typename A0,

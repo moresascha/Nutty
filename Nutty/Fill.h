@@ -23,16 +23,7 @@ namespace nutty
     >
     void Fill(Iterator<T, C>& begin, Iterator<T, C>& end, Generator g)
     {
-        size_t d = Distance(begin, end);
-
-        nutty::HostBuffer<T> b(d);
-
-        for(auto s = b.Begin(); s != b.End(); ++s)
-        {
-            s = g();
-        }
-
-        Copy(begin, b.Begin(), d);
+        nutty::base::Fill(begin, end, g);
     }
 
     template <

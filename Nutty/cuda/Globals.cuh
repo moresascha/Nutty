@@ -83,3 +83,13 @@ struct ShrdMemory<float3>
         return s_float3;
     }
 };
+
+template<>
+struct ShrdMemory<float2>
+{
+    __device__ float2* Ptr(void) 
+    { 
+        extern __device__ __shared__ float2 s_float2[];
+        return s_float2;
+    }
+};
