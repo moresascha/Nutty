@@ -11,7 +11,7 @@
 #include "../Scan.h"
 #include "../Functions.h"
 
-std::stringstream g_ss;
+std::stringstream g_ss; //te
 void print(const int& t)
 {
 	g_ss.str("");
