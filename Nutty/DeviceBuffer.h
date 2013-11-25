@@ -1,5 +1,6 @@
 #pragma once
 #include "base/Buffer.h"
+#include "DevicePtr.h"
 
 namespace nutty
 {
@@ -52,23 +53,38 @@ namespace nutty
     };
 
     template<
-        typename T
+        typename T,
+        typename Allocator = CudaAllocator<T>
     >
     class DeviceBuffer 
-        : public nutty::base::Base_Buffer<T, DeviceContent<T>, CudaAllocator<T>>
+        : public nutty::base::Base_Buffer<T, DeviceContent<T>, Allocator>
     {
 
-         typedef nutty::base::Base_Buffer<T, DeviceContent<T>, CudaAllocator<T>> base_class;
+         typedef nutty::base::Base_Buffer<T, DeviceContent<T>, Allocator> base_class;
 
     public:
-        DeviceBuffer(void)
-            : base_class()
+
+        typedef DeviceBuffer<T, NullAllocator<T>> MappedDeviceBuffer;
+
+        DeviceBuffer(size_type n) 
+            : base_class(n)
         {
 
         }
 
-        DeviceBuffer(size_type n) 
+        DeviceBuffer(void) 
+        {
+
+        }
+
+        DeviceBuffer(pointer p, size_type n) 
             : base_class(n)
+        {
+            m_ptr = p;
+        }
+
+        DeviceBuffer(DeviceBuffer&& c) 
+            : base_class(std::move(c))
         {
 
         }
@@ -77,6 +93,16 @@ namespace nutty
             : base_class(n, t)
         {
 
+        }
+
+        DeviceBuffer& operator=(DeviceBuffer&& c)
+        {
+            return base_class::operator=(std::move(c));
+        }
+
+        DevicePtr<T> GetDevicePtr(void)
+        {
+            return DevicePtr<T>(m_ptr);
         }
     };
 }

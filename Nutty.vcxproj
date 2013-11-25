@@ -30,10 +30,10 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -69,6 +69,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(CUDA_PATH)/include;$(IncludePath)</IncludePath>
     <SourcePath>$(SourcePath)</SourcePath>
+    <OutDir>.\lib</OutDir>
+    <IntDir>.\tmp</IntDir>
+    <TargetName>$(ProjectName)$(PlatformName)$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -122,21 +125,26 @@
     <ClInclude Include="Nutty\Alloc.h" />
     <ClInclude Include="Nutty\base\Content.h" />
     <ClInclude Include="Nutty\base\fill.h" />
+    <ClInclude Include="Nutty\base\foreach.h" />
     <ClInclude Include="Nutty\base\reduce.h" />
+    <ClInclude Include="Nutty\base\scan.h" />
     <ClInclude Include="Nutty\base\sort.h" />
     <ClInclude Include="Nutty\cuda\Array.h" />
     <ClInclude Include="Nutty\base\Buffer.h" />
     <ClInclude Include="Nutty\cuda\copy.h" />
     <ClInclude Include="Nutty\cuda\cuda_helper.h" />
-    <ClInclude Include="Nutty\cuda\fill.h" />
     <ClInclude Include="Nutty\cuda\reduce.h" />
+    <ClInclude Include="Nutty\cuda\scan.h" />
     <ClInclude Include="Nutty\DeviceBuffer.h" />
     <ClInclude Include="Nutty\Copy.h" />
     <ClInclude Include="Nutty\base\copy.h" />
     <ClInclude Include="Nutty\cuda\sort.h" />
+    <ClInclude Include="Nutty\DevicePtr.h" />
     <ClInclude Include="Nutty\Functions.h" />
     <ClInclude Include="Nutty\HostBuffer.h" />
     <ClInclude Include="Nutty\inc\drvapi_error_string.h" />
+    <ClInclude Include="Nutty\interop\D3DInterop.h" />
+    <ClInclude Include="Nutty\interop\shared_resources.h" />
     <ClInclude Include="Nutty\Nutty.h" />
     <ClInclude Include="Nutty\Fill.h" />
     <ClInclude Include="Nutty\ForEach.h" />
@@ -151,17 +159,21 @@
     <ClInclude Include="Nutty\Scan.h" />
     <ClInclude Include="Nutty\Sort.h" />
     <ClInclude Include="Nutty\cuda\Stream.h" />
+    <ClInclude Include="Nutty\Wrap.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="Nutty\testing\reduce.cu">
       <CodeGeneration Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">compute_20,sm_20</CodeGeneration>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="Nutty\testing\reduce_index.cu">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </CudaCompile>
     <CudaCompile Include="Nutty\testing\reduce_range.cu">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </CudaCompile>
     <CudaCompile Include="Nutty\testing\scan.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </CudaCompile>
     <CudaCompile Include="Nutty\testing\sort.cu">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -169,6 +181,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Nutty\cuda\Globals.cuh" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Nutty\internal.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -12,6 +12,7 @@
 #include "../Functions.h"
 
 std::stringstream g_ss; //te
+
 void print(const int& t)
 {
 	g_ss.str("");
@@ -25,7 +26,7 @@ struct scandata
 	int operator()()
 	{
 		int r = rand();
-		return r/(float)RAND_MAX > 0 ? r : -1;
+		return r % 10;
 	}
 };
 
@@ -38,19 +39,28 @@ int main(void)
 #endif 
 
     //create nutty
+	srand(NULL);
     nutty::Init();
-	size_t elems = 13;
-	nutty::DeviceBuffer<int> toScan(elems, 0);
+	nutty::DeviceBuffer<int> toScan(16, 0);
+
+    nutty::DeviceBuffer<int> scanned(16, -1);
+
+    nutty::DeviceBuffer<uint> sums(1, 0);
 
 	nutty::Fill(toScan.Begin(), toScan.End(), scandata());
 
 	nutty::ForEach(toScan.Begin(), toScan.End(), print);
 	
-	nutty::Scan(toScan.Begin(), toScan.End());
+    nutty::PrefixSumScan(toScan.Begin(), toScan.End(), scanned.Begin(), sums.Begin());
 	OutputDebugStringA("\n");
 
+	nutty::ForEach(scanned.Begin(), scanned.End(), print);
+    OutputDebugStringA("\n");
 	nutty::ForEach(toScan.Begin(), toScan.End(), print);
-    
+	OutputDebugStringA("\n");
+
+    nutty::ForEach(sums.Begin(), sums.End(), print);
+	OutputDebugStringA("\n");
     //release nutty
     nutty::Release();
 

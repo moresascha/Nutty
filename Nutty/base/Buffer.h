@@ -14,10 +14,9 @@ namespace nutty
         class Base_Buffer
         {
         private:
-            Base_Buffer(const Base_Buffer& c) { } //don't copy it
+            Base_Buffer(const Base_Buffer& b) {}
 
         public:
-
             Base_Buffer(Base_Buffer&& c) : m_ptr(NULL), m_size(0)
             {
                 m_ptr = c.m_ptr;
@@ -45,6 +44,7 @@ namespace nutty
 
             typedef T* pointer;
             typedef const T& const_type_reference;
+            typedef const pointer const_pointer;
             typedef T& type_reference;
             typedef Iterator<T, Base_Buffer<T, Content, Allocator>> iterator;
             typedef const Iterator<T, Base_Buffer<T, Content, Allocator>> const_iterator;
@@ -53,7 +53,7 @@ namespace nutty
             Base_Buffer(void)
             {
                 m_size = 0;
-                m_ptr = NULL;
+                m_ptr = 0;
             }
 
             Base_Buffer(size_type n)
@@ -146,15 +146,15 @@ namespace nutty
                 return operator[](it);
             }
 
-            pointer GetRawPointer(void)
-            {
-                return m_ptr;
-            }
-
-            pointer* GetRawPointerPointer(void)
+            pointer* GetRawPointer(void)
             {
                 return &m_ptr;
             }
+
+            /*pointer GetRawPointer(void)
+            {
+                return m_ptr;
+            }*/
 
             ~Base_Buffer(void)
             {

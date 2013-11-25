@@ -38,21 +38,18 @@ namespace nutty
         uint m_flags;
     };
 
-    CUcontext g_CudaContext;
-    CUdevice g_device = NULL;
-    bool initialized = false;
+    extern CUcontext g_CudaContext;
+    extern CUdevice g_device;
+    extern bool g_initialized;
 
-    std::map<std::string, cuModule*> g_modules;
-    std::map<std::string, cuKernel*> g_kernel;
-
-    bool Init(ID3D11Device* device = NULL)
+    __inline bool Init(ID3D11Device* device = NULL)
     {
-        if(initialized)
+        if(g_initialized)
         {
             return true;
         }
 
-        initialized = true;
+        g_initialized = true;
 
         CUDA_DRIVER_SAFE_CALLING_NO_SYNC(cuInit(0));
 
@@ -74,11 +71,7 @@ namespace nutty
         return true;
     }
 
-    cuKernel* GetKernel(const char* name);
-
-    cuModule* GetModule(void);
-
-    void Release(void)
+    __inline void Release(void)
     {
         if(g_CudaContext)
         {
@@ -86,6 +79,5 @@ namespace nutty
             g_CudaContext = NULL;
         }
     }
-
 }
 

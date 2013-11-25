@@ -34,7 +34,11 @@ struct ShrdMemory
     }
 };
 
-template< template <typename, typename> class KVPair, class K, class V>
+template<
+    template <
+        typename, typename
+    > class KVPair, class K, class V
+>
 struct ShrdMemory<KVPair<K, V>>
 {
     __device__ KVPair<K, V>* Ptr(void) 

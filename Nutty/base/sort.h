@@ -56,11 +56,10 @@ namespace nutty
         }
 
         template <
-            typename T,
-            typename C,
+            typename Iterator_,
             typename BinaryOperation
         >
-        void Sort(Iterator<T, C>& start, Iterator<T, C>& end, BinaryOperation op)
+        void Sort(Iterator_& start, Iterator_& end, BinaryOperation op)
         {
             uint length = (uint)Distance(start, end);
 
@@ -161,13 +160,11 @@ namespace nutty
         }
 
         template <
-            typename T,
-            typename C,
-            typename K,
-            typename KC,
+            typename IteratorKey,
+            typename IteratorData,
             typename BinaryOperation
         >
-        void Sort(Iterator<K, KC>& keyStart, Iterator<K, KC>& keyEnd, Iterator<T, C>& valuesBegin, BinaryOperation op)
+        void Sort(IteratorKey& keyStart, IteratorKey& keyEnd, IteratorData& valuesBegin, BinaryOperation op)
         {
             uint length = (uint)Distance(keyStart, keyEnd);
 

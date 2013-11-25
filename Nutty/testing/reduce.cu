@@ -47,7 +47,7 @@ int main(void)
         OutputDebugStringA(ss.str().c_str());
         nutty::DeviceBuffer<int> a(i);
         nutty::Fill(a.Begin(), a.End(), nutty::unary::Sequence<int>());
-        nutty::Reduce(a, nutty::binary::Max<int>());
+        nutty::Reduce(a.Begin(), a.End(), nutty::binary::Max<int>());
         
         uint r = a[0];
         if(r != i-1)

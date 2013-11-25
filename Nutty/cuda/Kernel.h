@@ -2,6 +2,7 @@
 #include "../Inc.h"
 #include "Stream.h"
 #include "../DeviceBuffer.h"
+#include "../DevicePtr.h"
 
 namespace nutty
 {
@@ -73,9 +74,18 @@ namespace nutty
         template< 
             typename T
         >
+        void SetKernelArg(uint index, nutty::DevicePtr<T>& arg)
+        {
+            CUdeviceptr* ptr = (CUdeviceptr*)arg.GetRawPointerPtr();
+            m_ppArgs[index] = ptr;
+        }
+
+        template< 
+            typename T
+        >
         void SetKernelArg(uint index, nutty::DeviceBuffer<T>& arg)
         {
-            CUdeviceptr* ptr = (CUdeviceptr*)arg.GetRawPointerPointer();
+            CUdeviceptr* ptr = (CUdeviceptr*)arg.GetRawPointer();
             m_ppArgs[index] = ptr;
         }
 

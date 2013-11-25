@@ -4,7 +4,7 @@
 
 namespace nutty
 {
-    __device__ __host__ uint getmsb(uint c)
+    __device__ __host__ __forceinline uint getmsb(uint c)
     {
         uint bit = 31;
         for(uint i = (uint)(1 << 31); i > 0; i>>=1)
@@ -18,7 +18,7 @@ namespace nutty
         return 0;
     }
 
-    __host__ bool ispow2(int c)
+    __host__ __forceinline bool ispow2(int c)
     {
         return !(c & (c-1));
     }
@@ -28,7 +28,7 @@ namespace nutty
         template <
             typename T
         >
-        T getCudaGrid(T dataCnt, T groupSize)
+        __forceinline T getCudaGrid(T dataCnt, T groupSize)
         {
             if(dataCnt % groupSize == 0)
             {

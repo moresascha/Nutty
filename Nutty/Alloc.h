@@ -29,6 +29,26 @@ namespace nutty
     template <
         typename T
     >
+    class NullAllocator
+    {
+        typedef T* pointer;
+        typedef size_t size_type;
+
+    public:
+        pointer Allocate(size_type n)
+        {
+            return NULL;
+        }
+
+        void Deallocate(pointer ptr)
+        {
+
+        }
+    };
+
+    template <
+        typename T
+    >
     class DefaultAllocator
     {
     private:
@@ -39,12 +59,15 @@ namespace nutty
     public:
         pointer Allocate(size_type n)
         {
-            return (pointer)malloc(n * sizeof(T));
+            pointer p;
+            cudaMallocHost(&p, n * sizeof(T));
+            return p;
         }
 
         void Deallocate(pointer ptr)
         {
-            free(ptr);
+            cudaFreeHost(ptr);
+            //free(ptr);
         }
     };
 }

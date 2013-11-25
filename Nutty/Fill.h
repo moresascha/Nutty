@@ -17,21 +17,20 @@ namespace nutty
     };
 
     template <
-        typename T,
-        typename C,
+        typename Iterator_,
         typename Generator
     >
-    void Fill(Iterator<T, C>& begin, Iterator<T, C>& end, Generator g)
+    void Fill(Iterator_& begin, Iterator_& end, Generator g)
     {
         nutty::base::Fill(begin, end, g);
     }
 
-    template <
+    /*template <
         typename T,
-        typename C
+        typename Iterator_
     >
-    void Fill(Iterator<T, C>& begin, Iterator<T, C>& end, const T& v)
+    void Fill(Iterator_& begin, Iterator_& end, const T& v)
     {
         nutty::base::Fill(begin, end, v);
-    }
+    }*/
 }

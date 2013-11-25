@@ -18,60 +18,22 @@ namespace nutty
     }
 
     template <
-        typename T,
-        typename C,
+        typename IteratorDst,
+        typename IteratorSrc,
         typename BinaryOperation
     >
-    void Reduce(Iterator<T, C>& begin, Iterator<T, C>& end, BinaryOperation op)
+    void Reduce(IteratorDst& dst, IteratorSrc& srcBegin, IteratorSrc& srcEnd, BinaryOperation op)
     {
-        nutty::base::Reduce(begin, end, op);
+        nutty::base::Reduce(dst, srcBegin, Distance(srcBegin, srcEnd), op);
     }
 
     template <
-        typename T,
-        typename C,
-        typename A,
-        typename T0,
-        typename C0,
+        typename IteratorDst,
+        typename IteratorSrc,
         typename BinaryOperation
     >
-    void Reduce(Iterator<T, C>& dstBegin, Iterator<T, C>& dstEnd, base::Base_Buffer<T0, C0, A>& src, BinaryOperation op)//,  BinaryOperation op)
+    void Reduce(IteratorDst& start, IteratorSrc& end, BinaryOperation op)
     {
-        nutty::base::Reduce(dstBegin, dstEnd, src.Begin(), src.End(), op);
-    }
-
-    template <
-        typename T,
-        typename C0,
-        typename C1,
-        typename A0,
-        typename A1,
-        typename BinaryOperation
-    >
-    void Reduce(base::Base_Buffer<T, C0, A0>& dst, base::Base_Buffer<T, C1, A1>& src, BinaryOperation op)
-    {
-        nutty::base::Reduce(dst.Begin(), dst.End(), src.Begin(), src.End(), op);
-    }
-
-    template <
-        typename T,
-        typename C,
-        typename A,
-        typename BinaryOperation
-    >
-    void Reduce(base::Base_Buffer<T, C, A>& data, BinaryOperation op)
-    {
-        nutty::base::Reduce(data.Begin(), data.End(), op);
-    }
-
-    template <
-        typename T,
-        typename C,
-        typename A,
-        typename BinaryOperation
-    >
-    T Reduce(BinaryOperation op, base::Base_Buffer<T, C, A>& data)
-    {
-        return nutty::base::Reduce(op, data.Begin(), data.End());
+        nutty::base::Reduce(start, start, Distance(start, end), op);
     }
 }

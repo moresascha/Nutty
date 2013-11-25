@@ -1,18 +1,15 @@
 #pragma once
 #include "Inc.h"
+#include "base/foreach.h"
 
 namespace nutty
 {
     template <
-        typename T, 
-        typename C,
+        typename Iterator_,
         typename Operation
     >
-    void ForEach(Iterator<T, C>& start, Iterator<T, C>& end, Operation op)
+    void ForEach(Iterator_& start, Iterator_& end, Operation op)
     {
-        for(Iterator<T, C> s = start; s != end; ++s)
-        {
-            op(*s);
-        }
+        base::ForEach(start, end, op);
     }
 }

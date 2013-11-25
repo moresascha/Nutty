@@ -25,6 +25,9 @@
     <Filter Include="Header Files\inc">
       <UniqueIdentifier>{2e871d47-0a7f-4ea9-9871-ce8cab64cb71}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\interop">
+      <UniqueIdentifier>{99d62d5a-6cc1-4c58-a76a-242028f746d4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Nutty\Fill.h">
@@ -114,14 +117,32 @@
     <ClInclude Include="Nutty\Functions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Nutty\cuda\fill.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Nutty\cuda\cuda_helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Nutty\Scan.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Nutty\interop\D3DInterop.h">
+      <Filter>Header Files\interop</Filter>
+    </ClInclude>
+    <ClInclude Include="Nutty\Wrap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Nutty\DevicePtr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Nutty\base\foreach.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="Nutty\cuda\scan.h">
+      <Filter>Header Files\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="Nutty\base\scan.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="Nutty\interop\shared_resources.h">
+      <Filter>Header Files\interop</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -137,10 +158,18 @@
     <CudaCompile Include="Nutty\testing\scan.cu">
       <Filter>Header Files\test</Filter>
     </CudaCompile>
+    <CudaCompile Include="Nutty\testing\reduce_index.cu">
+      <Filter>Header Files\test</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Nutty\cuda\Globals.cuh">
       <Filter>Header Files\cuda</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Nutty\internal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

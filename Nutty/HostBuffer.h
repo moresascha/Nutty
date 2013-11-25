@@ -58,14 +58,13 @@ namespace nutty
         typedef nutty::base::Base_Buffer<T, HostContent<T>> base_class;
 
     public:
-        HostBuffer(void)
-            : base_class()
+        HostBuffer(size_type n) 
+            : base_class(n)
         {
 
         }
 
-        HostBuffer(size_type n) 
-            : base_class(n)
+        HostBuffer(void)
         {
 
         }

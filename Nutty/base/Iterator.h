@@ -55,13 +55,6 @@ namespace nutty
             return t;
         }
 
-/*
-        T operator=(T t)
-        {
-            m_container->Insert(*this, t);
-            return t;
-        }*/
-
         bool operator==(const Iterator& it)
         {
             return m_ptr == it.m_ptr;

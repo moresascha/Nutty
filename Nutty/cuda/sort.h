@@ -286,20 +286,14 @@ namespace nutty
         }
 
         template <
-            typename K,
-            typename T,
+            typename IteratorKey,
+            typename IteratorData,
             typename BinaryOperation
         >
         void SortKeyPerGroup(
-        Iterator<
-            K, nutty::base::Base_Buffer<K, nutty::DeviceContent<K>, nutty::CudaAllocator<K>>
-            >& keyBegin, 
-        Iterator<
-            K, nutty::base::Base_Buffer<K, nutty::DeviceContent<K>, nutty::CudaAllocator<K>> 
-            >& keyEnd, 
-        Iterator<
-            T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-            >& values, 
+        IteratorKey& keyBegin, 
+        IteratorKey& keyEnd, 
+        IteratorData& values, 
         uint elementsPerBlock, uint startStage, uint endstage, uint startStep, uint length, BinaryOperation op)
         {
             dim3 block = (elementsPerBlock + elementsPerBlock%2)/2;

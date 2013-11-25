@@ -15,7 +15,7 @@ namespace nutty
 
             }
 
-            int operator()(void)
+            T operator()(void)
             {
                 return i++;
             }
