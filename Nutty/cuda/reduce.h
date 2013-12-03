@@ -128,7 +128,7 @@ namespace nutty
             }
 
             reduceIndexed
-                <<<grid, block, block.x * sizeof(T)>>>
+                <<<grid, block, block.x * sizeof(T), g_currentStream>>>
                 (src, dst, op, index, extreme, invalidIndex, elementsPerBlock, startStage, memoryOffset + (uint)d, memoryOffset);
         }
 
@@ -154,7 +154,7 @@ namespace nutty
             }
 
             reduce
-                <<<grid, block, block.x * sizeof(T)>>>
+                <<<grid, block, block.x * sizeof(T), g_currentStream>>>
                 (src, dst, op, elementsPerBlock, startStage, memoryOffset + d, memoryOffset);
         }
     }

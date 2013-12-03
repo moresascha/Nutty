@@ -14,9 +14,9 @@ void print(const int& t)
 {
     std::stringstream ss;
     ss << t;
-    ss << " ";
+    ss << " "; 
     OutputDebugStringA(ss.str().c_str());
-    if((++c % 16) == 0) OutputDebugStringA("\n");
+   // if((++c % 16) == 0) OutputDebugStringA("\n");
 }
 
 struct sortinfo
@@ -71,14 +71,15 @@ int main(void)
     sortinfo si;
     for(int i = 1; i < 2; ++i)
     {
-        nutty::DeviceBuffer<int> a(16);
-        nutty::DeviceBuffer<int> key(16);
+        nutty::DeviceBuffer<int> a(1024);
+        nutty::DeviceBuffer<int> key(1024);
         srand(13123); //13123
 
         nutty::Fill(a.Begin(), a.End(), rand);
         nutty::Fill(key.Begin(), key.End(), nutty::unary::Sequence<int>());
         
         nutty::ForEach(a.Begin(), a.End(), print);
+        OutputDebugStringA("\n");
         nutty::ForEach(key.Begin(), key.End(), print);
         /*a.Insert(0, 10124); 
         a.Insert(1, 25584);
@@ -105,14 +106,40 @@ int main(void)
     
         //nutty::ForEach(a.Begin(), a.End(), print);
 
-        //OutputDebugStringA("\n");
+        OutputDebugStringA("\n");
         c = 0;
+        for(int i = 0; i < a.Size(); ++i)
+        {
+            print(a[key[i]]);
+        }
 
+        OutputDebugStringA("\n");
         //nutty::SortDescending(a);
+        nutty::Sort(a.Begin(), a.End(), nutty::BinaryDescending<int>());
+        //nutty::Sort(key.Begin(), key.End(), a.Begin(), nutty::BinaryDescending<int>());
+//         nutty::ForEach(a.Begin(), a.End(), print);
+//         nutty::ForEach(key.Begin(), key.End(), print);
+
+        for(int i = 0; i < a.Size(); ++i)
+        {
+            print(a[key[i]]);
+        }
+
+        OutputDebugStringA("\n");
+
         nutty::Sort(key.Begin(), key.End(), a.Begin(), nutty::BinaryDescending<int>());
-        nutty::ForEach(a.Begin(), a.End(), print);
+//         nutty::ForEach(a.Begin(), a.End(), print);
         nutty::ForEach(key.Begin(), key.End(), print);
+         OutputDebugStringA("\n");
         //
+
+        for(int i = 0; i < a.Size(); ++i)
+        {
+            print(a[key[i]]);
+        }
+
+        OutputDebugStringA("\n");
+
         /*
         if(!checkSort(a, &si))
         {

@@ -1,5 +1,6 @@
 #pragma once
 #include "base/Buffer.h"
+#include "HostBuffer.h"
 #include "DevicePtr.h"
 
 namespace nutty
@@ -73,6 +74,7 @@ namespace nutty
         }
 
         DeviceBuffer(void) 
+            : base_class()
         {
 
         }

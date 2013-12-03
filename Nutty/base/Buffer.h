@@ -156,7 +156,7 @@ namespace nutty
                 return m_ptr;
             }*/
 
-            ~Base_Buffer(void)
+            virtual ~Base_Buffer(void)
             {
                 Clear();
             }

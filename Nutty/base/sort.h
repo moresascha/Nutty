@@ -30,27 +30,21 @@ namespace nutty
     namespace base
     {
         template <
-            typename T,
+            typename Iterator_,
             typename BinaryOperation
         >
         void SortPerGroup(
-        Iterator<
-                T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-                >& start, 
-        Iterator<
-                T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-                >& end, 
-        uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
+            Iterator_& begin, 
+            uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
         {
-            nutty::cuda::SortPerGroup(start, end, elementsPerBlock, startStage, endStage, startStep, length, op);
+            nutty::cuda::SortPerGroup(begin, elementsPerBlock, startStage, endStage, startStep, length, op);
         }
 
         template<
-            typename T, 
+            typename Iterator_,
             typename BinaryOperation
         >
-        void SortStep(Iterator<T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-        >& start, uint grid, uint block, uint stage, uint step, uint length, BinaryOperation op, uint offset = 0)
+        void SortStep(Iterator_& start, uint grid, uint block, uint stage, uint step, uint length, BinaryOperation op, uint offset = 0)
         {
             nutty::cuda::SortStep(start, grid, block, stage, step, length, op, offset);
         }
@@ -61,7 +55,17 @@ namespace nutty
         >
         void Sort(Iterator_& start, Iterator_& end, BinaryOperation op)
         {
-            uint length = (uint)Distance(start, end);
+            size_t d = Distance(start, end);
+            base::Sort(start, d, op);
+        }
+
+        template <
+            typename Iterator_,
+            typename BinaryOperation
+        >
+        void Sort(Iterator_& start, size_t d, BinaryOperation op)
+        {
+            uint length = (uint)d;
 
             uint elemCount = length;
 
@@ -84,7 +88,7 @@ namespace nutty
                 perGroupEndStage = 1 << (getmsb(elemsPerBlock) + 1);
             }
 
-            SortPerGroup(start, end, elemsPerBlock, 2, perGroupEndStage, 1, length, op);
+            SortPerGroup(start, elemsPerBlock, 2, perGroupEndStage, 1, length, op);
 
             elemCount = length;
             elemsPerBlock = maxElemsBlock;
@@ -109,7 +113,7 @@ namespace nutty
                 {
                     if((step << 1) <= elemsPerBlock)
                     {
-                        SortPerGroup(start, end, elemsPerBlock, pow2stage, pow2stage, step, length, op);
+                        SortPerGroup(start, elemsPerBlock, pow2stage, pow2stage, step, length, op);
                         break;
                     }
                     else
@@ -121,27 +125,6 @@ namespace nutty
         }
 
         //key value
-
-        /*template <
-            typename K,
-            typename T,
-            typename BinaryOperation
-        >
-        void SortKeyPerGroup(
-        Iterator<
-                K, nutty::base::Base_Buffer<K, nutty::DeviceContent<K>, nutty::CudaAllocator<K>>
-                >& keyBegin, 
-        Iterator<
-                K, nutty::base::Base_Buffer<K, nutty::DeviceContent<K>, nutty::CudaAllocator<K>>
-                >& keyEnd,
-        Iterator<
-                T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-                >& values, 
-        uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
-        {
-            nutty::cuda::SortKeyPerGroup(keyBegin, keyEnd, values, elementsPerBlock, startStage, endStage, startStep, length, op);
-        }*/
-
         template <
             typename K,
             typename T, 
@@ -198,7 +181,7 @@ namespace nutty
             {
                 return;
             }
-            /*
+
             uint stageStart = elemsPerBlock << 1;
             uint grid = cuda::getCudaGrid(length, elemsPerBlock);
 
@@ -214,16 +197,15 @@ namespace nutty
                 {
                     if((step << 1) <= elemsPerBlock)
                     {
-                        SortKeyPerGroup(start, end, elemsPerBlock, pow2stage, pow2stage, step, length, op);
+                        nutty::cuda::SortKeyPerGroup(keyStart, keyEnd, valuesBegin, elemsPerBlock, pow2stage, pow2stage, step, length, op);
                         break;
                     }
                     else
                     {
-                        SortKeyStep(start, grid, elemsPerBlock, pow2stage, step, length, op);
+                        nutty::cuda::SortKeyStep(keyStart, valuesBegin, grid, elemsPerBlock, pow2stage, step, length, op);
                     }
                 }
             }
-            */
         }
     }
 }

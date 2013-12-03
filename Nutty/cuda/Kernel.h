@@ -89,7 +89,12 @@ namespace nutty
             m_ppArgs[index] = ptr;
         }
 
-        void Call(CUstream stream = NULL)
+        void Call(const cuStream& stream)
+        {
+            Call(stream.GetPointer());
+        }
+
+        void Call(const CUstream stream = NULL)
         {
             CUDA_DRIVER_SAFE_CALLING_SYNC(
                 cuLaunchKernel(

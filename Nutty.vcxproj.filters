@@ -54,9 +54,6 @@
     <ClInclude Include="Nutty\Nutty.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Nutty\inc\cutil_math.h">
-      <Filter>Header Files\inc</Filter>
-    </ClInclude>
     <ClInclude Include="Nutty\inc\drvapi_error_string.h">
       <Filter>Header Files\inc</Filter>
     </ClInclude>
@@ -143,6 +140,9 @@
     </ClInclude>
     <ClInclude Include="Nutty\interop\shared_resources.h">
       <Filter>Header Files\interop</Filter>
+    </ClInclude>
+    <ClInclude Include="Nutty\cuda\Event.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

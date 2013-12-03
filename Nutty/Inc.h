@@ -24,8 +24,8 @@ namespace cudahErrorLog
     }
 }
 
-#ifdef _DEBUG
-#define CUDA_SAFE
+#if defined _DEBUG
+    #define CUDA_SAFE
 #endif
 
 #ifdef CUDA_SAFE 

@@ -8,8 +8,17 @@ namespace nutty
         typename T,
         typename GFXBuffer
     >
-    MappedPtr<T> Wrap(GFXBuffer* pointer)
+    MappedBufferPtr<T> WrapBuffer(GFXBuffer* pointer, uint flags = 0)
     {
-        return interop::Wrap<T>(pointer, cudaGraphicsMapFlagsNone);
+        return interop::Wrap<T>(pointer, flags);
+    }
+
+    template <
+        typename T,
+        typename GFXTexture
+    >
+    MappedTexturePtr<T> WrapTexture(GFXTexture* pointer, uint flags = 0)
+    {
+        return interop::Wrap<T>(pointer, flags);
     }
 }

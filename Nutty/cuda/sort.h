@@ -123,13 +123,30 @@ namespace nutty
             typename BinaryOperation
         >
         void SortPerGroup(
+        DevicePtr<T>& vals,
+        uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
+        {
+            cudaBitonicMergeSortPerGroup(vals(), elementsPerBlock, startStage, endStage, startStep, length, op);
+        }
+
+        template <
+            typename T,
+            typename BinaryOperation
+        >
+        void SortPerGroup(
         Iterator<
             T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-            >& valuesBegin, 
-        Iterator<
-            T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>> 
-            >& valuesEnd, 
+            >& vals,
         uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
+        {
+            cudaBitonicMergeSortPerGroup(vals(), elementsPerBlock, startStage, endStage, startStep, length, op);
+        }
+
+        template <
+            typename T,
+            typename BinaryOperation
+        >
+        void cudaBitonicMergeSortPerGroup(T* begin, uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
         {
             dim3 block = (elementsPerBlock + elementsPerBlock%2)/2;//1 << nutty::getmsb((elementsPerBlock + (elementsPerBlock%2))/2);
             dim3 grid = getCudaGrid(length, elementsPerBlock);
@@ -137,24 +154,22 @@ namespace nutty
             uint shrdMem = elementsPerBlock * sizeof(T);
 
             bitonicMergeSortPerGroup
-                <<<grid, block, shrdMem>>>
+                <<<grid, block, shrdMem, g_currentStream>>>
                 (
-                valuesBegin(), startStage, endStage, startStep, length, op
+                begin, startStage, endStage, startStep, length, op
                 );
         }
 
         template <
-            typename T,
+            typename Iterator_,
             typename BinaryOperation
         >
         void SortStep(
-        Iterator<
-            T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-            >& values, 
+            Iterator_& values,
         uint grid, uint block, uint stage, uint step, uint length, BinaryOperation op, uint offset = 0)
         {
             bitonicMergeSortStep
-                <<<grid, block>>>
+                <<<grid, block, 0, g_currentStream>>>
                 (
                 values(), stage, step, length, op, offset
                 );
@@ -218,8 +233,6 @@ namespace nutty
                 {
                     k[offset + first] = k1;
                     k[offset + second] = k0;
-                    /*v[offset + first] = v1;
-                    v[offset + second] = v0;*/
                 }
             }
         }
@@ -229,9 +242,9 @@ namespace nutty
             typename K,
             typename BinaryOperation
         >
-        __global__ void bitonicMergeSortKeyStep(T* v, K* k, uint stage, uint step, BinaryOperation _cmp_func, uint offset = 0)
+        __global__ void bitonicMergeSortKeyStep(T* v, K* k, uint stage, uint step, uint length, BinaryOperation _cmp_func, uint offset = 0)
         {
-            __bitonicMergeSortKeyStep(v, k, stage, step, GlobalId, _cmp_func, offset);
+            __bitonicMergeSortKeyStep(v, k, stage, step, GlobalId, length, _cmp_func, offset);
         }
 
         template <
@@ -299,7 +312,7 @@ namespace nutty
             dim3 block = (elementsPerBlock + elementsPerBlock%2)/2;
             dim3 grid = getCudaGrid(length, elementsPerBlock);
 
-            uint shrdMem = 0;//elementsPerBlock * sizeof(KVPair<K,T>);
+            uint shrdMem = 0; //todo
 
             bitonicMergeSortKeyPerGroup
                 <<<grid, block, shrdMem>>>
@@ -309,22 +322,18 @@ namespace nutty
         }
 
         template <
-            typename T,
-            typename K,
+            typename IteratorKey,
+            typename IteratorData,
             typename BinaryOperation
         >
         void SortKeyStep(
-        Iterator<
-        K, nutty::base::Base_Buffer<K, nutty::DeviceContent<K>, nutty::CudaAllocator<K>>
-        >& keys, 
-        Iterator<
-        T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
-        >& values, 
-        uint grid, uint block, uint stage, uint step, BinaryOperation op, uint offset = 0)
+        IteratorKey& keys, 
+        IteratorData& values, 
+        uint grid, uint block, uint stage, uint step, uint length, BinaryOperation op, uint offset = 0)
         {
             bitonicMergeSortKeyStep<<<grid, block>>>
                 (
-                values(), keys(), stage, step, op
+                values(), keys(), stage, step, length, op
                 );
         }
     }

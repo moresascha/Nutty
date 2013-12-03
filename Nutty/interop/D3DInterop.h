@@ -1,5 +1,6 @@
 #pragma once
 #include "../Inc.h"
+#include "DevicePtr.h"
 #include "cuda_d3d11_interop.h"
 #include "shared_resources.h"
 
@@ -13,27 +14,21 @@ namespace nutty
         template <
             typename T
         >
-        MappedPtr<T> Wrap(ID3D11Buffer* pointer, unsigned int flags)
+        MappedBufferPtr<T> Wrap(ID3D11Buffer* pointer, unsigned int flags)
         {
             cudaGraphicsResource_t res;
-            cudaGraphicsD3D11RegisterResource(&res, pointer, flags);
-            return MappedPtr<T>(res);
+            CUDA_RT_SAFE_CALLING_NO_SYNC(cudaGraphicsD3D11RegisterResource(&res, pointer, flags));
+            return MappedBufferPtr<T>(res);
         }
 
         template <
             typename T
         >
-        DevicePtr<T> Bind(MappedPtr<T>& mapped)
+        MappedTexturePtr<T> Wrap(ID3D11Texture2D* pointer, unsigned int flags)
         {
-            return mapped.Bind();
-        }
-
-        template <
-            typename T
-        >
-        void Unbind(MappedPtr<T>& mapped)
-        {
-            mapped.Unbind();
+            cudaGraphicsResource_t res;
+            CUDA_RT_SAFE_CALLING_NO_SYNC(cudaGraphicsD3D11RegisterResource(&res, pointer, flags));
+            return MappedTexturePtr<T>(res);
         }
     }
 }
