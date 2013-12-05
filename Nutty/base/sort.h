@@ -85,7 +85,7 @@ namespace nutty
             uint perGroupEndStage = elemsPerBlock;
             if(elemsPerBlock & (elemsPerBlock-1))
             {
-                perGroupEndStage = 1 << (getmsb(elemsPerBlock) + 1);
+                perGroupEndStage = 1 << (GetMSB(elemsPerBlock) + 1);
             }
 
             SortPerGroup(start, elemsPerBlock, 2, perGroupEndStage, 1, length, op);
@@ -99,12 +99,12 @@ namespace nutty
             }
 
             uint stageStart = elemsPerBlock << 1;
-            uint grid = cuda::getCudaGrid(length, elemsPerBlock);
+            uint grid = cuda::GetCudaGrid(length, elemsPerBlock);
 
             uint endStage = length;
             if(length & (length-1))
             {
-                endStage = 1 << (getmsb(length) + 1);
+                endStage = 1 << (GetMSB(length) + 1);
             }
 
             for(uint pow2stage = stageStart; pow2stage <= endStage; pow2stage <<= 1)
@@ -169,7 +169,7 @@ namespace nutty
             uint perGroupEndStage = elemsPerBlock;
             if(elemsPerBlock & (elemsPerBlock-1))
             {
-                perGroupEndStage = 1 << (getmsb(elemsPerBlock) + 1);
+                perGroupEndStage = 1 << (GetMSB(elemsPerBlock) + 1);
             }
 
             nutty::cuda::SortKeyPerGroup(keyStart, keyEnd, valuesBegin, elemsPerBlock, 2, perGroupEndStage, 1, length, op);
@@ -183,12 +183,12 @@ namespace nutty
             }
 
             uint stageStart = elemsPerBlock << 1;
-            uint grid = cuda::getCudaGrid(length, elemsPerBlock);
+            uint grid = cuda::GetCudaGrid(length, elemsPerBlock);
 
             uint endStage = length;
             if(length & (length-1))
             {
-                endStage = 1 << (getmsb(length) + 1);
+                endStage = 1 << (GetMSB(length) + 1);
             }
 
             for(uint pow2stage = stageStart; pow2stage <= endStage; pow2stage <<= 1)

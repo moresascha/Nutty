@@ -28,6 +28,12 @@ namespace cudahErrorLog
     #define CUDA_SAFE
 #endif
 
+#ifdef CUDA_SAFE
+    #define DEVICE_SYNC_CHECK() CUDA_RT_SAFE_CALLING_NO_SYNC(cudaDeviceSynchronize())
+#else
+    #define DEVICE_SYNC_CHECK()
+#endif
+
 #ifdef CUDA_SAFE 
 #define CUDA_DRIVER_SAFE_CALLING_NO_SYNC(__error__) {  \
     if (CUDA_SUCCESS != __error__) { \

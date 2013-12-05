@@ -197,7 +197,7 @@ namespace nutty
             PrefixSumOp<T> op0;
             PrefixSumOp<uint> op1;
             
-            dim3 grid = cuda::getCudaGrid(d, ELEMS_PER_BLOCK);
+            dim3 grid = cuda::GetCudaGrid(d, ELEMS_PER_BLOCK);
 
             if(grid.x == 1)
             {
@@ -217,10 +217,10 @@ namespace nutty
         >
         void CompactScan(T* begin, T* end, T* scanned, uint* sums, size_t d)
         {
-            CompactScanOp<T, -1> op0;
-            CompactScanOp<uint, -2> op1;
+            CompactScanOp<T, (uint)-1> op0;
+            CompactScanOp<uint, (uint)-2> op1;
 
-            dim3 grid = cuda::getCudaGrid(d, ELEMS_PER_BLOCK);
+            dim3 grid = cuda::GetCudaGrid(d, ELEMS_PER_BLOCK);
 
             if(grid.x == 1)
             {
@@ -251,13 +251,13 @@ namespace nutty
             }
 
             dim3 block = elementsPerBlock / 2;
-            dim3 grid = cuda::getCudaGrid(d, elementsPerBlock);
+            dim3 grid = cuda::GetCudaGrid(d, elementsPerBlock);
 
             size_t startStage = elementsPerBlock / 2;
 
-            if(!ispow2(startStage))
+            if(!Ispow2(startStage))
             {
-                startStage = 1 << (getmsb(d));
+                startStage = 1 << (GetMSB(d));
             }
 
             _scan<<<grid, block, elementsPerBlock * sizeof(T)>>>(op0, begin, scanned, sums, op0.GetNeutral(), startStage, d, 1);

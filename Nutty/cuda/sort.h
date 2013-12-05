@@ -78,6 +78,7 @@ namespace nutty
         >
         __global__ void bitonicMergeSortPerGroup(T* g_values, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation _cmp_func)
         {
+            
             uint tId = threadIdx.x;
             uint i = 2 * GlobalId;
 
@@ -95,9 +96,9 @@ namespace nutty
             {
                 shrd[2 * tId + 1] = g_values[i + 1];
             }
-            
+
             uint step = startStep;
-          
+
             for(uint stage = startStage; stage <= endStage;)
             {
                 for(;step > 0; step = step >> 1)
@@ -116,6 +117,47 @@ namespace nutty
             {
                 g_values[i + 1] = shrd[2 * tId + 1];
             }
+            /*
+            uint tId = threadIdx.x;
+            uint i = GlobalId; //2*
+            
+            if(2*i >= length)
+            {
+                return;
+            }
+
+            ShrdMemory<T> shrdMem;
+            T* shrd = shrdMem.Ptr();
+
+            shrd[tId + 0] = g_values[i + 0];
+
+            if(i + blockDim.x < length)
+            {
+                shrd[tId + blockDim.x] = g_values[i + blockDim.x];
+            }
+
+            uint step = startStep;
+
+            for(uint stage = startStage; stage <= endStage;)
+            {
+                for(;step > 0; step = step >> 1)
+                {
+                    __syncthreads();
+                    __bitonicMergeSortStep(shrd, stage, step, tId, length, _cmp_func);
+                }
+
+                stage <<= 1;
+                step = stage >> 1;
+            }
+
+            __syncthreads();
+
+            g_values[i + 0] = shrd[tId + 0];
+
+            if(i + blockDim.x < length)
+            {
+                g_values[i + blockDim.x] = shrd[tId + blockDim.x];
+            }*/
         }
 
         template <
@@ -149,7 +191,7 @@ namespace nutty
         void cudaBitonicMergeSortPerGroup(T* begin, uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
         {
             dim3 block = (elementsPerBlock + elementsPerBlock%2)/2;//1 << nutty::getmsb((elementsPerBlock + (elementsPerBlock%2))/2);
-            dim3 grid = getCudaGrid(length, elementsPerBlock);
+            dim3 grid = GetCudaGrid(length, elementsPerBlock);
 
             uint shrdMem = elementsPerBlock * sizeof(T);
 
@@ -310,7 +352,7 @@ namespace nutty
         uint elementsPerBlock, uint startStage, uint endstage, uint startStep, uint length, BinaryOperation op)
         {
             dim3 block = (elementsPerBlock + elementsPerBlock%2)/2;
-            dim3 grid = getCudaGrid(length, elementsPerBlock);
+            dim3 grid = GetCudaGrid(length, elementsPerBlock);
 
             uint shrdMem = 0; //todo
 

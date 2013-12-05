@@ -67,27 +67,28 @@ namespace nutty
     class cuStreamPool
     {
     private:
-        const static uint LIMIT = 16;
-        cuStream* m_pStreams[LIMIT]; //fermi
-        uint m_index;
+        const static byte MAX_LIMIT = 16;
+        cuStream* m_pStreams[MAX_LIMIT]; //fermi
+        byte m_index;
+        byte m_limit;
 
     public:
-        cuStreamPool(void) : m_index(0)
+        cuStreamPool(byte limit = MAX_LIMIT) : m_index(0), m_limit(min(limit, MAX_LIMIT))
         {
-            for(int i = 0; i < LIMIT; ++i)
+            for(byte i = 0; i < m_limit; ++i)
             {
                 m_pStreams[i] = new cuStream();
             }
         }
 
-        const cuStream& PeekNextStream(void)
+        cuStream& PeekNextStream(void)
         {
-            return *m_pStreams[(m_index++) % LIMIT];
+            return *m_pStreams[(m_index++) % m_limit];
         }
 
         ~cuStreamPool(void)
         {
-            for(int i = 0; i < LIMIT; ++i)
+            for(byte i = 0; i < m_limit; ++i)
             {
                 SAFE_DELETE(m_pStreams[i]);
                 m_pStreams[i] = NULL;

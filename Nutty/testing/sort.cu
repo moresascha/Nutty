@@ -7,6 +7,7 @@
 #include "../Inc.h"
 #include "../ForEach.h"
 #include "../Functions.h"
+#include <ctime>
 
 uint c = 0;
 
@@ -26,10 +27,11 @@ struct sortinfo
     int b;
 };
 
-bool checkSort(nutty::DeviceBuffer<int>& b, sortinfo* si)
+template < typename IT>
+bool checkSort(IT& b, uint size, sortinfo* si)
 {
     nutty::HostBuffer<int> cpy(b.Size());
-    nutty::Copy(cpy.Begin(), b.Begin(), b.Size());
+    nutty::Copy(cpy.Begin(), b.Begin(), size);
     auto it = cpy.Begin();
     int i = 0;
     int _cc = 0;
@@ -38,9 +40,9 @@ bool checkSort(nutty::DeviceBuffer<int>& b, sortinfo* si)
         int cc = *it;
         if(cc < i)
         {
-            si->pos = _cc;
-            si->a = i;
-            si->b = cc;
+            //si->pos = _cc;
+            //si->a = i;
+            //si->b = cc;
             /*std::stringstream m;
             m << cc;
             m << " ";
@@ -68,94 +70,40 @@ int main(void)
 #endif 
 
     nutty::Init();
-    sortinfo si;
-    for(int i = 1; i < 2; ++i)
-    {
-        nutty::DeviceBuffer<int> a(1024);
-        nutty::DeviceBuffer<int> key(1024);
-        srand(13123); //13123
-
-        nutty::Fill(a.Begin(), a.End(), rand);
-        nutty::Fill(key.Begin(), key.End(), nutty::unary::Sequence<int>());
-        
-        nutty::ForEach(a.Begin(), a.End(), print);
-        OutputDebugStringA("\n");
-        nutty::ForEach(key.Begin(), key.End(), print);
-        /*a.Insert(0, 10124); 
-        a.Insert(1, 25584);
-        a.Insert(2, 30488);
-        a.Insert(3, 87);
-        a.Insert(4, 2407);
-        a.Insert(5, 30977);
-        a.Insert(6, 24132);
-        a.Insert(7, 21753);
-        a.Insert(8, 30033);
-        a.Insert(9, 24335);
-        a.Insert(10, 30960);
-        a.Insert(11, 16301);
-        a.Insert(12, 8520);
-        a.Insert(13, 16950);
-        a.Insert(14, 6301);
-        a.Insert(15, 2695);
-        a.Insert(16, 13148);
-        a.Insert(17, 25424);
-        a.Insert(18, 8582);
-        a.Insert(19, 21598);
-        a.Insert(20, 11353);
-        a.Insert(21, 26639);*/
     
-        //nutty::ForEach(a.Begin(), a.End(), print);
+    uint end = 1 << 24;
+    nutty::DeviceBuffer<int> a(end);
 
-        OutputDebugStringA("\n");
-        c = 0;
-        for(int i = 0; i < a.Size(); ++i)
+    srand(13123); //13123
+
+    //nutty::ForEach(a.Begin(), a.End(), print);
+    std::ofstream profileSort("sortProfile.txt");
+    
+   for(int i = 2; i <= end; ++i)
+    {
+        //int i = 2773;
+        nutty::Fill(a.Begin(), a.Begin() + i - 1, rand);
+        a.Insert(i - 1, -1);
+        //nutty::ForEach(a.Begin(), a.Begin() + i, print);
+        clock_t start = clock();
+        nutty::Sort(a.Begin(), a.Begin() + i, nutty::BinaryDescending<int>());
+        cudaDeviceSynchronize();
+        int n = a[0];
+        clock_t end = clock();
+        double millis = (double)(end - start)/CLOCKS_PER_SEC;
+        if(n != -1)
         {
-            print(a[key[i]]);
+            profileSort << n;
+            profileSort << "\n\n\nError";
+            profileSort.close();
+            return 0;
         }
-
-        OutputDebugStringA("\n");
-        //nutty::SortDescending(a);
-        nutty::Sort(a.Begin(), a.End(), nutty::BinaryDescending<int>());
-        //nutty::Sort(key.Begin(), key.End(), a.Begin(), nutty::BinaryDescending<int>());
-//         nutty::ForEach(a.Begin(), a.End(), print);
-//         nutty::ForEach(key.Begin(), key.End(), print);
-
-        for(int i = 0; i < a.Size(); ++i)
-        {
-            print(a[key[i]]);
-        }
-
-        OutputDebugStringA("\n");
-
-        nutty::Sort(key.Begin(), key.End(), a.Begin(), nutty::BinaryDescending<int>());
-//         nutty::ForEach(a.Begin(), a.End(), print);
-        nutty::ForEach(key.Begin(), key.End(), print);
-         OutputDebugStringA("\n");
-        //
-
-        for(int i = 0; i < a.Size(); ++i)
-        {
-            print(a[key[i]]);
-        }
-
-        OutputDebugStringA("\n");
-
-        /*
-        if(!checkSort(a, &si))
-        {
-            std::stringstream ss;
-            ss << "N=" << i << ", pos=" << si.pos << ", values=" << si.a << " > " << si.b << "\n";
-            OutputDebugStringA(ss.str().c_str());
-            nutty::ForEach(a.Begin(), a.End(), print);
-            break;
-        }
-        else
-        {
-            //nutty::ForEach(a.Begin(), a.End(), print);
-        }*/
-
+        profileSort << i;
+        profileSort << " ";
+        profileSort << millis;
+        profileSort << "\n";
     }
-
+    profileSort.close();
     nutty::Release();
 
     return 0;

@@ -191,7 +191,8 @@
     <CudaCompile Include="Nutty\testing\sort.cu">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <TargetMachinePlatform Condition="'$(Configuration)|$(Platform)'=='Release|x64'">64</TargetMachinePlatform>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>

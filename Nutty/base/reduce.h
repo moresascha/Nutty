@@ -34,7 +34,7 @@ namespace nutty
 
             uint rest = (d % elementsPerBlock);
 
-            uint grid = d / elementsPerBlock;
+            uint grid = (uint)d / elementsPerBlock;
 
             if(rest > 0)
             {

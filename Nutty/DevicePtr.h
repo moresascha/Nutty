@@ -1,4 +1,5 @@
 #pragma once
+#include "cuda/copy.h"
 namespace nutty
 {
     template <
@@ -20,6 +21,13 @@ namespace nutty
         pointer* GetRawPointerPtr(void) { return &m_ptr; }
 
         pointer operator()(void) const { return m_ptr; }
+
+        T operator[](size_type index)
+        {
+            T t;
+            nutty::cuda::Copy(&t, m_ptr + index, 1, cudaMemcpyDeviceToHost);
+            return t;
+        }
 
         template <
             typename T
@@ -115,7 +123,6 @@ namespace nutty
     {
         return (end() - begin());
     }
-
 
     template <
         typename T

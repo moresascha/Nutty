@@ -122,9 +122,9 @@ namespace nutty
 
             uint startStage = elementsPerBlock;
 
-            if(!ispow2(startStage))
+            if(!Ispow2(startStage))
             {
-                startStage = 1 << (getmsb(d)+1);
+                startStage = 1 << (GetMSB(d)+1);
             }
 
             reduceIndexed
@@ -148,14 +148,14 @@ namespace nutty
 
             uint startStage = elementsPerBlock;
 
-            if(!ispow2(startStage))
+            if(!Ispow2(startStage))
             {
-                startStage = 1 << (getmsb(d)+1);
+                startStage = (1 << (GetMSB((uint)d)+1));
             }
 
             reduce
                 <<<grid, block, block.x * sizeof(T), g_currentStream>>>
-                (src, dst, op, elementsPerBlock, startStage, memoryOffset + d, memoryOffset);
+                (src, dst, op, elementsPerBlock, startStage, memoryOffset + (uint)d, memoryOffset);
         }
     }
 }
