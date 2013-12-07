@@ -62,10 +62,10 @@ namespace nutty
             return m_res;
         }
 
-        void Unbind(void)
+        void Unbind(cudaStream_t stream = NULL)
         {
             cudaGraphicsResource_t res = Get();
-            CUDA_RT_SAFE_CALLING_NO_SYNC(cudaGraphicsUnmapResources(1, &res));
+            CUDA_RT_SAFE_CALLING_NO_SYNC(cudaGraphicsUnmapResources(1, &res, stream));
         }
 
         size_t Size(void)
@@ -112,10 +112,10 @@ namespace nutty
         {
         }
 
-        DevicePtr<T> Bind(void)
+        DevicePtr<T> Bind(cudaStream_t stream = NULL)
         {
             cudaGraphicsResource_t res = Get();
-            CUDA_RT_SAFE_CALLING_NO_SYNC(cudaGraphicsMapResources(1, &res));
+            CUDA_RT_SAFE_CALLING_NO_SYNC(cudaGraphicsMapResources(1, &res, stream));
             T* devptr;
             CUDA_RT_SAFE_CALLING_NO_SYNC(cudaGraphicsResourceGetMappedPointer((void**)&devptr, &m_size, res));
             return DevicePtr<T>(devptr);
@@ -155,10 +155,10 @@ namespace nutty
         {
         }
 
-        DevicePtr<T> Bind(void)
+        DevicePtr<T> Bind(cudaStream_t stream = NULL)
         {
             cudaGraphicsResource_t res = Get();
-            CUDA_RT_SAFE_CALLING_NO_SYNC(cudaGraphicsMapResources(1, &res));
+            CUDA_RT_SAFE_CALLING_NO_SYNC(cudaGraphicsMapResources(1, &res, stream));
             T* devptr;
             CUDA_RT_SAFE_CALLING_NO_SYNC(cudaGraphicsSubResourceGetMappedArray((cudaArray_t*)&devptr, res, 0, 0));
             return DevicePtr<T>(devptr);

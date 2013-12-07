@@ -19,10 +19,22 @@ namespace nutty
         void* m_ppArgs[32];
 
     public:
-        cuKernel(CUfunction function) : m_fpCuda(function), m_shrdMemBytes(0), m_argCount(0)
+        cuKernel(CUfunction function) : m_shrdMemBytes(0), m_argCount(0)
         {
             memset(m_ppArgs, 0, 32 * sizeof(void*));
             memset(m_ppExtras, 0, 32 * sizeof(void*));
+            Create(function);
+        }
+
+        cuKernel(void) : m_fpCuda(NULL), m_shrdMemBytes(0), m_argCount(0)
+        {
+            memset(m_ppArgs, 0, 32 * sizeof(void*));
+            memset(m_ppExtras, 0, 32 * sizeof(void*));
+        }
+
+        void Create(CUfunction function)
+        {
+            m_fpCuda = function;
         }
 
         void SetSharedMemory(uint bytes)
