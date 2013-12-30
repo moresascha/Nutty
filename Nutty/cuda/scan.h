@@ -40,10 +40,9 @@ namespace nutty
 
         template <
             typename T,
-            typename ST,
             typename Oprator
         >
-        __global__ void _scan(Oprator op, T* content, ST* scanned, uint* sums, T neutralItem, uint startStage, uint length, uint writeSums)
+        __global__ void _exclusiveScan(Oprator op, T* content, T* scanned, T* sums, T neutralItem, uint startStage, uint length, byte writeSums)
         {
             ShrdMemory<T> s_mem;
             T* shrdMem = s_mem.Ptr();
@@ -55,8 +54,8 @@ namespace nutty
             uint gpos0 = globalPos;
             uint gpos1 = globalPos + 1;
 
-            uint i0 = neutralItem;
-            uint i1 = neutralItem;
+            T i0 = neutralItem;
+            T i1 = neutralItem;
 
             if(gpos0 < length)
             {
@@ -68,12 +67,22 @@ namespace nutty
                 i1 = content[gpos1];
             }
 
+            //todo
+            /*uint ai = thid;
+            uint bi = thid + (n/2);
+
+            uint bankOffsetA = CONFLICT_FREE_OFFSET(ai);
+            uint bankOffsetB = CONFLICT_FREE_OFFSET(bi);*/
+
             shrdMem[2 * (blockDim.x - thid - 1) + 0] = op(i1); //i1 == neutralItem ? 0 : (neutralItem==-2 ? i1 : 1);
             shrdMem[2 * (blockDim.x - thid - 1) + 1] = op(i0); //i0 == neutralItem ? 0 : (neutralItem==-2 ? i0 : 1);
 
             T last = op(i1); // == neutralItem ? 0 : 1;
 
             uint offset = 1;
+
+            __syncthreads();
+
             for(int i = startStage; i > 1; i >>= 1)
             {
                 if(thid < i)
@@ -136,7 +145,7 @@ namespace nutty
             typename T,
             typename ST
         >
-        __device__ void _compact(T* content, ST* scanned, T neutral, uint N)
+        __device__ void _compact(T* content, ST* mask, ST* scanned, ST neutral, uint N)
         {
             uint id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -145,10 +154,11 @@ namespace nutty
                 return;
             }
 
-            T t = scanned[id];
+            ST t = mask[id];
 
             if(t != neutral)
             {
+                t = scanned[id];
                 content[t] = content[id];
             }
         }
@@ -157,34 +167,27 @@ namespace nutty
             typename T,
             typename ST
         >
-        __global__ void compact(T* content, ST* scanned, T neutral, uint N)
+        __global__ void compact(T* content, ST* mask, ST* scanned, ST neutral, uint N)
         {
-            _compact(content, scanned, neutral, N);
+            _compact(content, mask, scanned, neutral, N);
         }
 
         template <
-            typename T,
-            typename ST
+            typename T
         >
-        __global__ void spreadSumsNCompact(T* content, ST* scanned, uint* scannedSums, T neutralElement, uint length)
+        __global__ void spreadSums(T* scanned, T* prefixSum, uint length)
         {
             uint thid = threadIdx.x;
             uint grpId = blockIdx.x;
             uint N = blockDim.x;
-            uint gid = grpId * N + thid;
+            uint gid = N + grpId * N + thid;
 
             if(gid >= length)
             {
                 return;
             }
 
-            T c = content[gid];
-
-            if(c != neutralElement)
-            {
-                int scanPos = scanned[gid] + scannedSums[grpId];
-                content[scanPos] = c;
-            }
+            scanned[gid] = scanned[gid] + prefixSum[grpId+1];
         }
 
         const static size_t ELEMS_PER_BLOCK = 512;
@@ -192,56 +195,44 @@ namespace nutty
         template <
             typename T
         >
-        void PrefixSumScan(T* begin, T* end, T* prefixSum, uint* sums, size_t d)
+        void ExclusivePrefixSumScan(T* begin, T* prefixSum, T* sums, size_t d)
         {
-            PrefixSumOp<T> op0;
-            PrefixSumOp<uint> op1;
+            PrefixSumOp<T> op;
             
             dim3 grid = cuda::GetCudaGrid(d, ELEMS_PER_BLOCK);
 
             if(grid.x == 1)
             {
-                Scan(begin, end, prefixSum, sums, NULL, d, op0, op1);
+                ExclusiveScan(begin, prefixSum, sums, (T*)NULL, d, op);
                 return;
             }
 
-            nutty::DeviceBuffer<uint> scannedSums(grid.x, op0.GetNeutral());
+            nutty::DeviceBuffer<T> scannedSums(grid.x, op.GetNeutral());
 
-            Scan(begin, end, prefixSum, sums, scannedSums.Begin()(), d, op0, op1);
+            ExclusiveScan(begin, prefixSum, sums, scannedSums.Begin()(), d, op);
 
-            spreadSumsNCompact<<<grid, ELEMS_PER_BLOCK>>>(begin, prefixSum, scannedSums.Begin()(), op0.GetNeutral(), d);
-        }
+            grid.x = grid.x - 1;
 
-        template <
-            typename T
-        >
-        void CompactScan(T* begin, T* end, T* scanned, uint* sums, size_t d)
-        {
-            CompactScanOp<T, (uint)-1> op0;
-            CompactScanOp<uint, (uint)-2> op1;
+            assert(grid.x > 0);
 
-            dim3 grid = cuda::GetCudaGrid(d, ELEMS_PER_BLOCK);
-
-            if(grid.x == 1)
-            {
-                Scan(begin, end, scanned, sums, NULL, d, op0, op1);
-                compact<<<1, d>>>(begin, scanned, op0.GetNeutral(), d);
-                return;
-            }
-
-            nutty::DeviceBuffer<uint> scannedSums(grid.x, op0.GetNeutral());
-            
-            Scan(begin, end, scanned, sums, scannedSums.Begin()(), d, op0, op1);
-
-            spreadSumsNCompact<<<grid, ELEMS_PER_BLOCK>>>(begin, scanned, scannedSums.Begin()(), op0.GetNeutral(), d);
+            spreadSums<<<grid, ELEMS_PER_BLOCK, 0, g_currentStream>>>(prefixSum, scannedSums.Begin()(), d);
         }
 
         template <
             typename T,
-            typename OperatorFirstStage,
-            typename OperatorSecondStage
+            typename ST
         >
-        void Scan(T* begin, T* end, T* scanned, uint* sums, uint* scannedSums, size_t d, OperatorFirstStage op0, OperatorSecondStage op1)
+        void Compact(T* dst, ST* mask, ST* scanned, ST neutralElement, size_t d)
+        {
+            dim3 grid = cuda::GetCudaGrid(d, (size_t)256);
+            compact<<<grid.x, 256, 0, g_currentStream>>>(dst, mask, scanned, neutralElement, d);
+        }
+
+        template <
+            typename T,
+            typename Operation
+        >
+        void ExclusiveScan(T* begin, T* scanned, T* sums, T* scannedSums, size_t d, Operation op)
         {
             size_t elementsPerBlock = ELEMS_PER_BLOCK;
 
@@ -257,10 +248,10 @@ namespace nutty
 
             if(!Ispow2(startStage))
             {
-                startStage = 1 << (GetMSB(d));
+                startStage = 1ULL << (GetMSB(startStage) + 1);
             }
 
-            _scan<<<grid, block, elementsPerBlock * sizeof(T)>>>(op0, begin, scanned, sums, op0.GetNeutral(), startStage, d, 1);
+            _exclusiveScan<<<grid, block, elementsPerBlock * sizeof(T), g_currentStream>>>(op, begin, scanned, sums, op.GetNeutral(), startStage, d, 1);
 
             if(grid.x == 1)
             {
@@ -268,7 +259,15 @@ namespace nutty
             }
 
             dim3 sumBlock = (grid.x + (grid.x % 2)) / 2;
-            _scan<<<1, sumBlock, 2 * sumBlock.x * sizeof(T)>>>(op1, sums, scannedSums, sums, op1.GetNeutral(), 4, grid.x, 0);
+
+            startStage = sumBlock.x;
+
+            if(!Ispow2(startStage))
+            {
+                startStage = 1ULL << (GetMSB(startStage) + 1);
+            }
+
+            _exclusiveScan<<<1, sumBlock, 2 * sumBlock.x * sizeof(T), g_currentStream>>>(op, sums, scannedSums, (T*)NULL, op.GetNeutral(), startStage, grid.x, 0);
         }
     }
 }

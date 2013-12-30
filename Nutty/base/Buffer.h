@@ -73,6 +73,7 @@ namespace nutty
 
             iterator Begin(void)
             {
+                assert(m_size > 0);
                 return iterator(m_ptr, this);
             }
 
@@ -98,8 +99,14 @@ namespace nutty
 
             void Resize(size_type n)
             {
-                Clear();
+                T* old = m_ptr;
+                size_type oldSize = m_size;
                 m_ptr = m_alloc.Allocate(n);
+                if(old)
+                {
+                    Copy(Begin(), const_iterator(old, this), oldSize);
+                    m_alloc.Deallocate(old);
+                }
                 m_size = n;
             }
 

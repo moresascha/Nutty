@@ -43,12 +43,12 @@ namespace nutty
             typename T_DST,
             typename BinaryOperator
         >
-        __global__ void reduce(T_SRC* data, T_DST* dst, BinaryOperator _operator, uint stride, uint startStage, uint length, uint memoryOffset)
+        __global__ void reduce(T_SRC* data, T_DST* dst, BinaryOperator _operator, uint stride, uint startStage, uint length, T_SRC neutral, uint memoryOffset)
         {
             uint si = blockIdx.x * stride + threadIdx.x;
 
             T_SRC d0 = data[memoryOffset + si];
-            T_SRC d1 = d0;
+            T_SRC d1 = neutral;
 
             if(memoryOffset + si + blockDim.x < length)
             {
@@ -136,7 +136,7 @@ namespace nutty
             typename T,
             typename BinaryOperation
         >
-        void Reduce(T* dst, T* src, size_t d, BinaryOperation op, uint elementsPerBlock, uint memoryOffset = 0)
+        void Reduce(T* dst, T* src, T neutral, size_t d, BinaryOperation op, uint elementsPerBlock, uint memoryOffset = 0)
         {
             if(elementsPerBlock >= d)
             {
@@ -155,7 +155,7 @@ namespace nutty
 
             reduce
                 <<<grid, block, block.x * sizeof(T), g_currentStream>>>
-                (src, dst, op, elementsPerBlock, startStage, memoryOffset + (uint)d, memoryOffset);
+                (src, dst, op, elementsPerBlock, startStage, memoryOffset + (uint)d, neutral, memoryOffset);
         }
     }
 }

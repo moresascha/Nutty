@@ -23,7 +23,7 @@ namespace nutty
             T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
             >& scanned)
         {
-            nutty::cuda::Scan(begin(), end(), scanned(), Distance(begin, end));
+            nutty::cuda::ExclusiveScan(begin(), end(), scanned(), Distance(begin, end));
         }
 
         template <
@@ -31,7 +31,7 @@ namespace nutty
         >
         void Scan(DevicePtr<T> begin, DevicePtr<T> end, DevicePtr<T> scanned)
         {
-            nutty::cuda::Scan(begin(), end(), scanned(), Distance(begin, end));
+            nutty::cuda::ExclusiveScan(begin(), end(), scanned(), Distance(begin, end));
         }
     }
 }

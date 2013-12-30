@@ -108,6 +108,15 @@ namespace nutty
 
         void Call(const CUstream stream = NULL)
         {
+#ifdef _DEBUG
+            for(byte i = 0; i < 16; ++i)
+            {
+                if(m_ppArgs[max(2 * i,0)] == NULL && m_ppArgs[max(2 * i + 1,0)] != NULL)
+                {
+                    assert(0 && L"Invalid Kernel Arguments!");
+                }
+            }
+#endif
             CUDA_DRIVER_SAFE_CALLING_SYNC(
                 cuLaunchKernel(
                 m_fpCuda, 

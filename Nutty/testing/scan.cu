@@ -23,10 +23,45 @@ void print(const int& t)
 
 struct scandata
 {
+    int c;
+    scandata(void) : c(0)
+    {
+
+    }
 	int operator()()
 	{
-		int r = rand();
-		return r % 10;
+		int r = 1;//rand();
+        if(c > 256)
+        {
+            r = 0;
+        }
+        c++;
+		return 1;// % 2;
+	}
+};
+
+struct Ray
+{
+    int a;
+    int b;
+};
+
+void printRay(const Ray& r)
+{
+    OutputDebugStringA("Ray:(");
+    print(r.a);
+    print(r.b);
+    OutputDebugStringA(") ");
+}
+
+struct RayData
+{
+	Ray operator()()
+	{
+        Ray r;
+        r.a = rand() % 10;
+        r.b = rand() % 10;
+		return r;
 	}
 };
 
@@ -36,31 +71,49 @@ int main(void)
     _CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
     _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
     _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
-#endif 
+#endif
 
     //create nutty
-	srand(NULL);
-    nutty::Init();
-	nutty::DeviceBuffer<int> toScan(16, 0);
+    nutty::Init(); 
 
-    nutty::DeviceBuffer<int> scanned(16, -1);
+   // while(1)
+    {
+        srand(NULL);
+        size_t size = 512*10; 
+        nutty::DeviceBuffer<Ray> rays(size);
+        nutty::Fill(rays.Begin(), rays.End(), RayData());
 
-    nutty::DeviceBuffer<uint> sums(1, 0);
+        nutty::DeviceBuffer<int> mask(size, 0);
+        nutty::Fill(mask.Begin(), mask.End(), scandata());
 
-	nutty::Fill(toScan.Begin(), toScan.End(), scandata());
+//         nutty::ForEach(mask.Begin(), mask.End(), print);
+//         OutputDebugStringA("\n");
 
-	nutty::ForEach(toScan.Begin(), toScan.End(), print);
-	
-    nutty::PrefixSumScan(toScan.Begin(), toScan.End(), scanned.Begin(), sums.Begin());
-	OutputDebugStringA("\n");
+        nutty::DeviceBuffer<int> scannedMask(size, 0); 
+        nutty::DeviceBuffer<int> sums(max(1, (int)(size/512)), 0);
 
-	nutty::ForEach(scanned.Begin(), scanned.End(), print);
-    OutputDebugStringA("\n");
-	nutty::ForEach(toScan.Begin(), toScan.End(), print);
-	OutputDebugStringA("\n");
+        /*nutty::ForEach(rays.Begin(), rays.End(), printRay);
+        OutputDebugStringA("\n");*/
 
-    nutty::ForEach(sums.Begin(), sums.End(), print);
-	OutputDebugStringA("\n");
+        nutty::ExclusivePrefixSumScan(mask.Begin(), mask.End(), scannedMask.Begin(), sums.Begin());
+
+        nutty::Compact(rays.Begin(), rays.End(), mask.Begin(), scannedMask.Begin(), 0);
+
+        /*nutty::ForEach(scannedMask.Begin(), scannedMask.End(), print);
+        OutputDebugStringA("\n");*/
+        nutty::ForEach(sums.Begin(), sums.End(), print);
+        OutputDebugStringA("\n");
+        /*
+        nutty::ForEach(rays.Begin(), rays.End(), printRay);
+        OutputDebugStringA("\n");}*/
+        int t = *(scannedMask.End()-1);
+        
+        print(t);
+        OutputDebugStringA("\n");
+    }
+
+
+
     //release nutty
     nutty::Release();
 

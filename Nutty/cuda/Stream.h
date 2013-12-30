@@ -75,6 +75,7 @@ namespace nutty
     public:
         cuStreamPool(byte limit = MAX_LIMIT) : m_index(0), m_limit(min(limit, MAX_LIMIT))
         {
+            assert(limit > 0);
             for(byte i = 0; i < m_limit; ++i)
             {
                 m_pStreams[i] = new cuStream();
@@ -84,6 +85,14 @@ namespace nutty
         cuStream& PeekNextStream(void)
         {
             return *m_pStreams[(m_index++) % m_limit];
+        }
+
+        void ClearEvents(void)
+        {
+            for(byte i = 0; i < m_limit; ++i)
+            {
+                m_pStreams[i]->ClearEvents();
+            }
         }
 
         ~cuStreamPool(void)

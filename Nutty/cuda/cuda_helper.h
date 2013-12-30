@@ -8,10 +8,14 @@
 
 namespace nutty
 {
-    __device__ __host__ __forceinline uint GetMSB(uint c)
+    template <
+        typename T,
+        T bits
+    >
+    __device__ __host__ __forceinline T GetMSB(T c)
     {
-        uint bit = 31;
-        for(uint i = (uint)(1 << 31); i > 0; i>>=1)
+        T bit = bits;
+        for(T i = (T)(1ULL << bits); i > 0; i>>=1)
         {
             if((c & i) == i)
             {
@@ -19,7 +23,17 @@ namespace nutty
             }
             bit--;
         }
-        return 0;
+        return (T)0;
+    }
+
+    __device__ __host__ __forceinline uint GetMSB(uint c)
+    {
+        return GetMSB<uint, 31>(c);
+    }
+
+    __device__ __host__ __forceinline size_t GetMSB(size_t c)
+    {
+        return GetMSB<size_t, 63>(c);
     }
 
     __host__ __forceinline bool Ispow2(int c)

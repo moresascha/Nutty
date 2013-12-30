@@ -20,20 +20,22 @@ namespace nutty
     template <
         typename IteratorDst,
         typename IteratorSrc,
-        typename BinaryOperation
+        typename BinaryOperation,
+        typename T
     >
-    void Reduce(IteratorDst& dst, IteratorSrc& srcBegin, IteratorSrc& srcEnd, BinaryOperation op)
+    void Reduce(IteratorDst& dst, IteratorSrc& srcBegin, IteratorSrc& srcEnd, BinaryOperation op, T neutral)
     {
-        nutty::base::Reduce(dst, srcBegin, Distance(srcBegin, srcEnd), op);
+        nutty::base::Reduce(dst, srcBegin, Distance(srcBegin, srcEnd), op, neutral);
     }
 
     template <
         typename IteratorDst,
         typename IteratorSrc,
-        typename BinaryOperation
+        typename BinaryOperation,
+        typename T
     >
-    void Reduce(IteratorDst& start, IteratorSrc& end, BinaryOperation op)
+    void Reduce(IteratorDst& start, IteratorSrc& end, BinaryOperation op, T neutral)
     {
-        nutty::base::Reduce(start, start, Distance(start, end), op);
+        nutty::base::Reduce(start, start, Distance(start, end), op, neutral);
     }
 }

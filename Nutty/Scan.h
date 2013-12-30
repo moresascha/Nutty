@@ -18,8 +18,18 @@ namespace nutty
         typename SumIterator
     >
     void Scan(Iterator_& begin, Iterator_& end, ScanIterator& scanned, SumIterator& sums)
+    { 
+        assert(0 && L"nyi");
+    }
+
+    template <
+        typename Iterator_,
+        typename ScanIterator,
+        typename T
+    >
+    void Compact(Iterator_& begin, Iterator_& end, ScanIterator& mask, ScanIterator& dstAddress, T neutral)
     {
-        assert(L"0");
+        nutty::cuda::Compact(begin(), mask(), dstAddress(), neutral, Distance(begin, end));
     }
 
     template <
@@ -27,18 +37,8 @@ namespace nutty
         typename ScanIterator,
         typename SumIterator
     >
-    void CompactScan(Iterator_& begin, Iterator_& end, ScanIterator& scanned, SumIterator& sums)
+    void ExclusivePrefixSumScan(Iterator_& begin, Iterator_& end, ScanIterator& prefixSum, SumIterator& sums)
     {
-        nutty::cuda::CompactScan(begin(), end(), scanned(), sums(), Distance(begin, end));
-    }
-
-    template <
-        typename Iterator_,
-        typename ScanIterator,
-        typename SumIterator
-    >
-    void PrefixSumScan(Iterator_& begin, Iterator_& end, ScanIterator& prefixSum, SumIterator& sums)
-    {
-        nutty::cuda::PrefixSumScan(begin(), end(), prefixSum(), sums(), Distance(begin, end));
+        nutty::cuda::ExclusivePrefixSumScan(begin(), prefixSum(), sums(), Distance(begin, end));
     }
 }

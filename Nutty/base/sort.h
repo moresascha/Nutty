@@ -44,9 +44,9 @@ namespace nutty
             typename Iterator_,
             typename BinaryOperation
         >
-        void SortStep(Iterator_& start, uint grid, uint block, uint stage, uint step, uint length, BinaryOperation op, uint offset = 0)
+        void SortStep(Iterator_& start, uint grid, uint block, uint stage, uint step, uint length, BinaryOperation op)
         {
-            nutty::cuda::SortStep(start, grid, block, stage, step, length, op, offset);
+            nutty::cuda::SortStep(start, grid, block, stage, step, length, op);
         }
 
         template <
