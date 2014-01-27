@@ -14,7 +14,7 @@ namespace nutty
             typename BinaryOperation,
             typename T
         >
-        void Reduce(
+        __host__ void Reduce(
         IteratorDst& dst, 
         IteratorSrc& src,
         size_t d,
@@ -48,6 +48,49 @@ namespace nutty
             if(elementsLeft > 1)
             {
                 base::Reduce(dst, dst, elementsLeft, op, neutral);
+            }
+        }
+
+        template <
+            typename IteratorDst,
+            typename IteratorSrc,
+            typename BinaryOperation,
+            typename T
+        >
+        __device__ void ReduceDP(
+        IteratorDst& dst, 
+        IteratorSrc& src,
+        size_t d,
+        BinaryOperation op,
+        T neutral)
+        {
+            uint elementsPerBlock = 512;
+
+            //assert(d > 1);
+
+            //todo: reduce small sets on the cpu
+
+            nutty::cuda::ReduceDP(dst(), src(), neutral, d, op, elementsPerBlock);
+
+            if(d < elementsPerBlock)
+            {
+                return;
+            }
+
+            uint rest = (d % elementsPerBlock);
+
+            uint grid = (uint)d / elementsPerBlock;
+
+            if(rest > 0)
+            {
+                nutty::cuda::ReduceDP(dst() + grid, src(), neutral, rest, op, rest, elementsPerBlock * grid);
+            }
+
+            UINT elementsLeft = (uint)d / elementsPerBlock + (rest ? 1 : 0);
+
+            if(elementsLeft > 1)
+            {
+                base::ReduceDP(dst, dst, elementsLeft, op, neutral);
             }
         }
 

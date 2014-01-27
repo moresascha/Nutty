@@ -3,10 +3,12 @@
 
 #ifdef _DEBUG
     #pragma comment(lib, "cuda.lib")
-    #pragma comment(lib, "cudart.lib")
+    #pragma comment(lib, "cudart_static.lib")
+    //#pragma comment(lib, "cudart.lib")
 #else
     #pragma comment(lib, "cuda.lib")
-    #pragma comment(lib, "cudart.lib")
+    #pragma comment(lib, "cudart_static.lib")
+    //#pragma comment(lib, "cudart.lib")
 #endif
 
 struct ID3D11Device;

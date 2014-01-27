@@ -15,12 +15,12 @@ typedef unsigned int uint;
 
 namespace cudahErrorLog
 {
-    void __forceinline LogError(const char* format, const char* error, const char* file, int line)
+    __host__ void __forceinline LogError(const char* format, const char* error, const char* file, int line)
     {
         std::stringstream ss;
         ss << error << " in " << file << " " << line << "\n";
         OutputDebugStringA(ss.str().c_str());
-        __debugbreak();
+       __debugbreak();
     }
 }
 

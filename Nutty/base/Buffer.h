@@ -100,11 +100,11 @@ namespace nutty
             void Resize(size_type n)
             {
                 T* old = m_ptr;
-                size_type oldSize = m_size;
+                size_type cpySize = min(n, m_size);
                 m_ptr = m_alloc.Allocate(n);
                 if(old)
                 {
-                    Copy(Begin(), const_iterator(old, this), oldSize);
+                    Copy(Begin(), const_iterator(old, this), cpySize);
                     m_alloc.Deallocate(old);
                 }
                 m_size = n;

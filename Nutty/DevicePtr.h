@@ -7,6 +7,7 @@ namespace nutty
     >
     class DevicePtr
     {
+    public:
         typedef T* pointer;
         typedef size_t size_type;
 
@@ -14,46 +15,56 @@ namespace nutty
         pointer m_ptr;
 
     public:
-        DevicePtr(const DevicePtr& p) : m_ptr(p.m_ptr) { }
+        __device__ __host__ DevicePtr(const DevicePtr& p) : m_ptr(p.m_ptr) { }
 
-        DevicePtr(pointer ptr) : m_ptr(ptr) { }
+        __device__ __host__ DevicePtr(pointer ptr) : m_ptr(ptr) { }
 
-        pointer* GetRawPointerPtr(void) { return &m_ptr; }
+        __device__ __host__ pointer* GetRawPointerPtr(void) { return &m_ptr; }
 
-        pointer operator()(void) const { return m_ptr; }
+        __device__ __host__ pointer operator()(void) const { return m_ptr; }
 
-        T operator[](size_type index)
+        __device__ __host__ T operator[](size_type index)
         {
             T t;
             nutty::cuda::Copy(&t, m_ptr + index, 1, cudaMemcpyDeviceToHost);
             return t;
         }
 
-        template <
-            typename T
-        >
-        friend DevicePtr<T> operator+(DevicePtr<T>& i0, DevicePtr<T>& i1);
+        __device__ __host__ ~DevicePtr(void)
+        {
+
+        }
 
         template <
             typename T
         >
-        friend DevicePtr<T> operator-(DevicePtr<T>& i0, DevicePtr<T>& i1);
+        __device__ __host__ friend DevicePtr<T> operator+(DevicePtr<T>& i0, DevicePtr<T>& i1);
 
         template <
             typename T
         >
-        friend DevicePtr<T> operator+(DevicePtr<T>& i0, size_type i);
+        __device__ __host__ friend DevicePtr<T> operator-(DevicePtr<T>& i0, DevicePtr<T>& i1);
 
         template <
             typename T
         >
-        friend DevicePtr<T> operator-(DevicePtr<T>& i0, size_type i);
+        __device__ __host__ friend DevicePtr<T> operator+(DevicePtr<T>& i0, size_type i);
+
+        template <
+            typename T
+        >
+        __device__ __host__ friend DevicePtr<T> operator+(DevicePtr<T>& i0, unsigned long long i);
+
+        template <
+            typename T
+        >
+        __device__ __host__ friend DevicePtr<T> operator-(DevicePtr<T>& i0, size_type i);
     };
 
     template <
         typename T
     >
-    DevicePtr<T> operator+(DevicePtr<T>& i0, DevicePtr<T>& i1)
+    __device__ __host__ DevicePtr<T> operator+(DevicePtr<T>& i0, DevicePtr<T>& i1)
     {
         T* p = i0.m_ptr + i1.m_ptr;
         DevicePtr<T> it(p);
@@ -63,7 +74,7 @@ namespace nutty
     template <
         typename T
     >
-    DevicePtr<T> operator-(DevicePtr<T>& i0, DevicePtr<T>& i1)
+    __device__ __host__ DevicePtr<T> operator-(DevicePtr<T>& i0, DevicePtr<T>& i1)
     {
         T* p = i0.m_ptr - i1.m_ptr;
         DevicePtr<T> it(p);
@@ -73,7 +84,7 @@ namespace nutty
     template <
         typename T
     >
-    DevicePtr<T> operator+(DevicePtr<T>& i0, typename DevicePtr<T>::size_type i)
+    __device__ __host__ DevicePtr<T> operator+(DevicePtr<T>& i0, typename DevicePtr<T>::size_type i)
     {
         T* p = i0.m_ptr + i;
         DevicePtr<T> it(p);
@@ -83,7 +94,7 @@ namespace nutty
     template <
         typename T
     >
-    DevicePtr<T> operator-(DevicePtr<T>& i0, typename DevicePtr<T>::size_type i)
+    __device__ __host__ DevicePtr<T> operator-(DevicePtr<T>& i0, typename DevicePtr<T>::size_type i)
     {
         T* p = i0.m_ptr - i;
         DevicePtr<T> it(p);
@@ -93,7 +104,15 @@ namespace nutty
     template <
         typename T
     >
-    size_t Distance(const DevicePtr<T>& begin, const DevicePtr<T>& end)
+    __device__ __host__ DevicePtr<T> operator+(DevicePtr<T>& i0, unsigned long long i)
+    {
+        return operator+(i0, (size_t)i);
+    }
+
+    template <
+        typename T
+    >
+    __device__ __host__ size_t Distance(const DevicePtr<T>& begin, const DevicePtr<T>& end)
     {
         return (end() - begin());
     }
@@ -101,7 +120,7 @@ namespace nutty
     template <
         typename T
     >
-    size_t Distance(DevicePtr<T>& begin, DevicePtr<T>& end)
+    __device__ __host__ size_t Distance(DevicePtr<T>& begin, DevicePtr<T>& end)
     {
         return (end() - begin());
     }
@@ -110,7 +129,7 @@ namespace nutty
         typename T,
         typename Iterator
     >
-    size_t Distance(Iterator& begin, DevicePtr<T>& end)
+    __device__ __host__ size_t Distance(Iterator& begin, DevicePtr<T>& end)
     {
         return (end() - begin());
     }
@@ -119,7 +138,7 @@ namespace nutty
         typename T,
         typename Iterator
     >
-    size_t Distance(DevicePtr<T>& begin, Iterator& end)
+    __device__ __host__ size_t Distance(DevicePtr<T>& begin, Iterator& end)
     {
         return (end() - begin());
     }
@@ -127,7 +146,7 @@ namespace nutty
     template <
         typename T
     >
-    DevicePtr<T> DevicePtr_Cast(T* ptr)
+    __device__ __host__ DevicePtr<T> DevicePtr_Cast(T* ptr)
     {
         return DevicePtr<T>(ptr);
     }

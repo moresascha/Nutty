@@ -128,7 +128,7 @@ namespace nutty
             }
 
             reduceIndexed
-                <<<grid, block, block.x * sizeof(T), g_currentStream>>>
+                <<<grid, block, block.x * sizeof(T), 0>>>
                 (src, dst, op, index, extreme, invalidIndex, elementsPerBlock, startStage, memoryOffset + (uint)d, memoryOffset);
         }
 
@@ -136,7 +136,7 @@ namespace nutty
             typename T,
             typename BinaryOperation
         >
-        void Reduce(T* dst, T* src, T neutral, size_t d, BinaryOperation op, uint elementsPerBlock, uint memoryOffset = 0)
+        __host__ void Reduce(T* dst, T* src, T neutral, size_t d, BinaryOperation op, uint elementsPerBlock, uint memoryOffset = 0)
         {
             if(elementsPerBlock >= d)
             {
@@ -154,7 +154,33 @@ namespace nutty
             }
 
             reduce
-                <<<grid, block, block.x * sizeof(T), g_currentStream>>>
+                <<<grid, block, block.x * sizeof(T), 0>>>
+                (src, dst, op, elementsPerBlock, startStage, memoryOffset + (uint)d, neutral, memoryOffset);
+        }
+
+        template <
+            typename T,
+            typename BinaryOperation
+        >
+        __device__ void ReduceDP(T* dst, T* src, T neutral, size_t d, BinaryOperation op, uint elementsPerBlock, uint memoryOffset = 0)
+        {
+            if(elementsPerBlock >= d)
+            {
+                elementsPerBlock = (uint)d + (d%2);
+            }
+
+            dim3 block = elementsPerBlock / 2; 
+            dim3 grid = max(1, (uint)((d / 2) / block.x));
+
+            uint startStage = elementsPerBlock;
+
+            if(!Ispow2(startStage))
+            {
+                startStage = (1 << (GetMSB((uint)d)+1));
+            }
+
+            reduce
+                <<<grid, block, block.x * sizeof(T), 0>>>
                 (src, dst, op, elementsPerBlock, startStage, memoryOffset + (uint)d, neutral, memoryOffset);
         }
     }

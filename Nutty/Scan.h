@@ -27,9 +27,9 @@ namespace nutty
         typename ScanIterator,
         typename T
     >
-    void Compact(Iterator_& begin, Iterator_& end, ScanIterator& mask, ScanIterator& dstAddress, T neutral)
+    void Compact(Iterator_& dstBegin, Iterator_& begin, Iterator_& end, ScanIterator& mask, ScanIterator& dstAddress, T neutral)
     {
-        nutty::cuda::Compact(begin(), mask(), dstAddress(), neutral, Distance(begin, end));
+        nutty::cuda::Compact(dstBegin(), begin(), mask(), dstAddress(), neutral, Distance(begin, end));
     }
 
     template <

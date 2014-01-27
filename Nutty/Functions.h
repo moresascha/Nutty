@@ -45,11 +45,23 @@ namespace nutty
             }
         };
 
+        template <
+            typename T
+        >
         struct RandNorm
         {
-            double operator()(void)
+            T m_scale;
+            RandNorm(T scale)
             {
-                return (double)(rand() / (double)RAND_MAX);
+                m_scale = scale;
+            }
+            RandNorm(void)
+            {
+                m_scale = 1;
+            }
+            T operator()(void)
+            {
+                return m_scale * (T)(rand() / (T)RAND_MAX);
             }
         };
     }

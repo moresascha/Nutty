@@ -81,6 +81,7 @@ int main(void)
         srand(NULL);
         size_t size = 512*10; 
         nutty::DeviceBuffer<Ray> rays(size);
+        nutty::DeviceBuffer<Ray> compactedRays(size);
         nutty::Fill(rays.Begin(), rays.End(), RayData());
 
         nutty::DeviceBuffer<int> mask(size, 0);
@@ -97,7 +98,7 @@ int main(void)
 
         nutty::ExclusivePrefixSumScan(mask.Begin(), mask.End(), scannedMask.Begin(), sums.Begin());
 
-        nutty::Compact(rays.Begin(), rays.End(), mask.Begin(), scannedMask.Begin(), 0);
+        nutty::Compact(compactedRays.Begin(), rays.Begin(), rays.End(), mask.Begin(), scannedMask.Begin(), 0);
 
         /*nutty::ForEach(scannedMask.Begin(), scannedMask.End(), print);
         OutputDebugStringA("\n");*/

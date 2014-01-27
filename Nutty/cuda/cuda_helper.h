@@ -36,7 +36,7 @@ namespace nutty
         return GetMSB<size_t, 63>(c);
     }
 
-    __host__ __forceinline bool Ispow2(int c)
+    __host__ __device__ __forceinline bool Ispow2(int c)
     {
         return !(c & (c-1));
     }
@@ -60,12 +60,23 @@ namespace nutty
         CUDA_RT_SAFE_CALLING_NO_SYNC(cudaMemset(b.Begin()(), 0, b.Size() * sizeof(T)));
     }
 
+    template <
+        template <class, class, class> class Buffer,
+        class T,
+        template <class> class Container,
+        template <class> class Allocator
+    >
+    __host__ __forceinline void SetMem(Buffer<T, Container<T>, Allocator<T>>& b, byte value)
+    {
+        CUDA_RT_SAFE_CALLING_NO_SYNC(cudaMemset(b.Begin()(), value, b.Size() * sizeof(T)));
+    }
+
     namespace cuda
     {
         template <
             typename T
         >
-        __forceinline T GetCudaGrid(T dataCnt, T groupSize)
+        __host__ __device__ __forceinline T GetCudaGrid(T dataCnt, T groupSize)
         {
             if(dataCnt % groupSize == 0)
             {

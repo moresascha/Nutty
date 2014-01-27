@@ -1,7 +1,5 @@
 #pragma once
 #include "../cuda/sort.h"
-#include "../HostBuffer.h"
-#include "../DeviceBuffer.h"
 
 namespace nutty
 {
@@ -33,7 +31,7 @@ namespace nutty
             typename Iterator_,
             typename BinaryOperation
         >
-        void SortPerGroup(
+        __host__ __device__ void SortPerGroup(
             Iterator_& begin, 
             uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
         {
@@ -44,7 +42,7 @@ namespace nutty
             typename Iterator_,
             typename BinaryOperation
         >
-        void SortStep(Iterator_& start, uint grid, uint block, uint stage, uint step, uint length, BinaryOperation op)
+        __host__ __device__ void SortStep(Iterator_& start, uint grid, uint block, uint stage, uint step, uint length, BinaryOperation op)
         {
             nutty::cuda::SortStep(start, grid, block, stage, step, length, op);
         }
@@ -53,7 +51,7 @@ namespace nutty
             typename Iterator_,
             typename BinaryOperation
         >
-        void Sort(Iterator_& start, Iterator_& end, BinaryOperation op)
+        __host__ __device__ void Sort(Iterator_& start, Iterator_& end, BinaryOperation op)
         {
             size_t d = Distance(start, end);
             base::Sort(start, d, op);
@@ -63,7 +61,7 @@ namespace nutty
             typename Iterator_,
             typename BinaryOperation
         >
-        void Sort(Iterator_& start, size_t d, BinaryOperation op)
+        __host__ __device__ void Sort(Iterator_& start, size_t d, BinaryOperation op)
         {
             uint length = (uint)d;
 

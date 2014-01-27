@@ -145,7 +145,7 @@ namespace nutty
             typename T,
             typename ST
         >
-        __device__ void _compact(T* content, ST* mask, ST* scanned, ST neutral, uint N)
+        __device__ void _compact(T* compactedContent, T* content, ST* mask, ST* scanned, ST neutral, uint N)
         {
             uint id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -159,7 +159,7 @@ namespace nutty
             if(t != neutral)
             {
                 t = scanned[id];
-                content[t] = content[id];
+                compactedContent[t] = content[id];
             }
         }
 
@@ -167,9 +167,9 @@ namespace nutty
             typename T,
             typename ST
         >
-        __global__ void compact(T* content, ST* mask, ST* scanned, ST neutral, uint N)
+        __global__ void compact(T* dstContent, T* content, ST* mask, ST* scanned, ST neutral, uint N)
         {
-            _compact(content, mask, scanned, neutral, N);
+            _compact(dstContent, content, mask, scanned, neutral, N);
         }
 
         template <
@@ -215,17 +215,17 @@ namespace nutty
 
             assert(grid.x > 0);
 
-            spreadSums<<<grid, ELEMS_PER_BLOCK, 0, g_currentStream>>>(prefixSum, scannedSums.Begin()(), d);
+            spreadSums<<<grid, ELEMS_PER_BLOCK, 0, 0>>>(prefixSum, scannedSums.Begin()(), d);
         }
 
         template <
             typename T,
             typename ST
         >
-        void Compact(T* dst, ST* mask, ST* scanned, ST neutralElement, size_t d)
+        void Compact(T* dst, T* src, ST* mask, ST* scanned, ST neutralElement, size_t d)
         {
             dim3 grid = cuda::GetCudaGrid(d, (size_t)256);
-            compact<<<grid.x, 256, 0, g_currentStream>>>(dst, mask, scanned, neutralElement, d);
+            compact<<<grid.x, 256, 0, 0>>>(dst, src, mask, scanned, neutralElement, d);
         }
 
         template <
@@ -251,7 +251,7 @@ namespace nutty
                 startStage = 1ULL << (GetMSB(startStage) + 1);
             }
 
-            _exclusiveScan<<<grid, block, elementsPerBlock * sizeof(T), g_currentStream>>>(op, begin, scanned, sums, op.GetNeutral(), startStage, d, 1);
+            _exclusiveScan<<<grid, block, elementsPerBlock * sizeof(T), 0>>>(op, begin, scanned, sums, op.GetNeutral(), startStage, d, 1);
 
             if(grid.x == 1)
             {
@@ -267,7 +267,7 @@ namespace nutty
                 startStage = 1ULL << (GetMSB(startStage) + 1);
             }
 
-            _exclusiveScan<<<1, sumBlock, 2 * sumBlock.x * sizeof(T), g_currentStream>>>(op, sums, scannedSums, (T*)NULL, op.GetNeutral(), startStage, grid.x, 0);
+             _exclusiveScan<<<1, sumBlock, 2 * sumBlock.x * sizeof(T), 0>>>(op, sums, scannedSums, (T*)NULL, op.GetNeutral(), startStage, grid.x, 0);
         }
     }
 }

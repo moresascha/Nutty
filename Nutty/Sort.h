@@ -8,7 +8,7 @@ namespace nutty
         typename DataIterator,
         typename BinaryOperation
     >
-    void Sort(IteratorKey& keyBegin, IteratorKey& keyEnd, DataIterator& values, BinaryOperation op)
+    __device__ __host__ void Sort(IteratorKey& keyBegin, IteratorKey& keyEnd, DataIterator& values, BinaryOperation op)
     {
         nutty::base::Sort(keyBegin, keyEnd, values, op);
     }
@@ -17,7 +17,7 @@ namespace nutty
         typename DataIterator,
         typename BinaryOperation
     >
-    void Sort(DataIterator& begin, DataIterator& end, BinaryOperation op)
+    __device__ __host__ void Sort(DataIterator& begin, DataIterator& end, BinaryOperation op)
     {
         nutty::base::Sort(begin, end, op);
     }
@@ -26,7 +26,7 @@ namespace nutty
         typename DataIterator,
         typename BinaryOperation
     >
-    void Sort(DataIterator& begin, size_t d, BinaryOperation op)
+    __device__ __host__ void Sort(DataIterator& begin, size_t d, BinaryOperation op)
     {
         nutty::base::Sort(begin, d, op);
     }

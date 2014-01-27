@@ -64,8 +64,7 @@ namespace nutty
 
         void Unbind(cudaStream_t stream = NULL)
         {
-            cudaGraphicsResource_t res = Get();
-            CUDA_RT_SAFE_CALLING_NO_SYNC(cudaGraphicsUnmapResources(1, &res, stream));
+            CUDA_RT_SAFE_CALLING_NO_SYNC(cudaGraphicsUnmapResources(1, &m_res, stream));
         }
 
         size_t Size(void)

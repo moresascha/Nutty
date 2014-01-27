@@ -103,8 +103,9 @@ namespace nutty
                     __bitonicMergeSortStep(shrd, stage, step, threadIdx.x, length, _cmp_func);
                 }
 
+                step = stage
                 stage <<= 1;
-                step = stage >> 1;
+                //step = stage >> 1;
             }
 
             g_values[__i + 0] = shrd[2 * threadIdx.x + 0];
@@ -160,7 +161,7 @@ namespace nutty
             typename T,
             typename BinaryOperation
         >
-        void SortPerGroup(
+        __host__ void SortPerGroup(
         DevicePtr<T>& vals,
         uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
         {
@@ -171,7 +172,7 @@ namespace nutty
             typename T,
             typename BinaryOperation
         >
-        void SortPerGroup(
+        __host__ void SortPerGroup(
         Iterator<
             T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
             >& vals,
@@ -184,7 +185,7 @@ namespace nutty
             typename T,
             typename BinaryOperation
         >
-        void cudaBitonicMergeSortPerGroup(T* begin, uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
+        __host__ void cudaBitonicMergeSortPerGroup(T* begin, uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
         {
             dim3 block = (elementsPerBlock + elementsPerBlock%2)/2;
             dim3 grid = GetCudaGrid(length, elementsPerBlock);
@@ -192,7 +193,7 @@ namespace nutty
             uint shrdMem = elementsPerBlock * sizeof(T);
 
             bitonicMergeSortPerGroup
-                <<<grid, block, shrdMem, g_currentStream>>>
+                <<<grid, block, shrdMem>>>
                 (
                 begin, startStage, endStage, startStep, length, op
                 );
@@ -202,12 +203,12 @@ namespace nutty
             typename Iterator_,
             typename BinaryOperation
         >
-        void SortStep(
+        __host__ void SortStep(
             Iterator_& values,
         uint grid, uint block, uint stage, uint step, uint length, BinaryOperation op)
         {
             bitonicMergeSortStep
-                <<<grid, block, 0, g_currentStream>>>
+                <<<grid, block, 0>>>
                 (
                 values(), stage, step, length, op
                 );
