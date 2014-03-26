@@ -41,6 +41,11 @@ namespace nutty
             CUDA_DRIVER_SAFE_CALLING_NO_SYNC(cuTexRefSetFlags(m_ref, CU_TRSF_NORMALIZED_COORDINATES));
         }
 
+        void SetFlags(uint flags)
+        {
+            CUDA_DRIVER_SAFE_CALLING_NO_SYNC(cuTexRefSetFlags(m_ref, flags));
+        }
+
         CUdeviceptr GetAddress(void)
         {
             CUdeviceptr ptr;

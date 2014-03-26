@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <cuda.h>
+#include <cuda_runtime.h>
 #include <vector>
 #include <vector_types.h>
 #include "inc/drvapi_error_string.h"
@@ -45,8 +46,8 @@ namespace cudahErrorLog
 
 #ifdef CUDA_SAFE 
 #define CUDA_DRIVER_SAFE_CALLING_SYNC(__error__) {  \
-    CUresult res = __error__;\
-    if (res != CUDA_SUCCESS || CUDA_SUCCESS != cuCtxSynchronize()) { \
+    CUresult __res = __error__;\
+    if (__res != CUDA_SUCCESS || CUDA_SUCCESS != cuCtxSynchronize()) { \
     cudahErrorLog::LogError("%s\n", getCudaDrvErrorString( __error__), __FILE__, __LINE__); \
     } }
 #else

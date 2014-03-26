@@ -103,7 +103,7 @@ namespace nutty
                     __bitonicMergeSortStep(shrd, stage, step, threadIdx.x, length, _cmp_func);
                 }
 
-                step = stage
+                step = stage;
                 stage <<= 1;
                 //step = stage >> 1;
             }

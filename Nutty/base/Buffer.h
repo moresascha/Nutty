@@ -49,6 +49,7 @@ namespace nutty
             typedef Iterator<T, Base_Buffer<T, Content, Allocator>> iterator;
             typedef const Iterator<T, Base_Buffer<T, Content, Allocator>> const_iterator;
             typedef size_t size_type;
+            typedef const size_type& const_size_typ_reference;
 
             Base_Buffer(void)
             {
@@ -73,7 +74,7 @@ namespace nutty
 
             iterator Begin(void)
             {
-                assert(m_size > 0);
+                //assert(m_size > 0);
                 return iterator(m_ptr, this);
             }
 
@@ -120,7 +121,7 @@ namespace nutty
                 m_ptr = NULL;
             }
 
-            size_type Size(void) const
+            const_size_typ_reference Size(void) const
             {
                 return m_size;
             }

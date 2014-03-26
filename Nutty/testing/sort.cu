@@ -7,7 +7,12 @@
 #include "../Inc.h"
 #include "../ForEach.h"
 #include "../Functions.h"
-#include <ctime>
+#include "../cuTimer.h"
+
+#include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
+#include <thrust/generate.h>
+#include <thrust/sort.h>
 
 uint c = 0;
 
@@ -67,43 +72,100 @@ int main(void)
     _CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
     _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
     _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
-#endif 
+#endif
 
     nutty::Init();
-    
-    uint end = 1 << 24;
-    nutty::DeviceBuffer<int> a(end);
+    /*
+    dim3 grid = 1 << 32 - 1;
+    dim3 block = 512;
+    nutty::DeviceBuffer<uint> ptr;
+    ptr.Resize(grid.x * block.x);
+    testKernel<<<grid, block >>>(ptr.Begin()());*/
 
-    srand(13123); //13123
+    DEVICE_SYNC_CHECK();
 
-    //nutty::ForEach(a.Begin(), a.End(), print);
-    std::ofstream profileSort("sortProfile.txt");
+    cudaDeviceProp props;
+
+    cudaGetDeviceProperties(&props, 0);
     
-   for(int i = 2; i <= end; ++i)
+    std::ofstream profile("sorting_profile.txt");
+
+    profile << "maxgridx=" << props.maxGridSize[0] << "\n";
+
+    profile << "Elems\nTime\n\n";
+
+    std::vector<double> times;
+
+    nutty::cuTimer timer;
+
+    int runs = 1;
+    uint startBit = 8;
+    uint maxBit = 25;
+    uint ivalStep = 1e6;
+    srand(0);
+
+    profile << "runs: " << runs << "\n\n";
+
+    for(uint i = startBit; i < maxBit; ++i)
     {
-        //int i = 2773;
-        nutty::Fill(a.Begin(), a.Begin() + i - 1, rand);
-        a.Insert(i - 1, -1);
-        //nutty::ForEach(a.Begin(), a.Begin() + i, print);
-        clock_t start = clock();
-        nutty::Sort(a.Begin(), a.Begin() + i, nutty::BinaryDescending<int>());
-        cudaDeviceSynchronize();
-        int n = a[0];
-        clock_t end = clock();
-        double millis = (double)(end - start)/CLOCKS_PER_SEC;
-        if(n != -1)
-        {
-            profileSort << n;
-            profileSort << "\n\n\nError";
-            profileSort.close();
-            return 0;
-        }
-        profileSort << i;
-        profileSort << " ";
-        profileSort << millis;
-        profileSort << "\n";
+        times.push_back(0);
+        profile << (1 << i) << "\n";
     }
-    profileSort.close();
+
+    bool error = false;
+    for(int k = 0; k < runs; k++)
+    {
+        if(error)
+        {
+            break;
+        }
+
+        for(int i = startBit; i < maxBit; ++i)
+        {
+            uint elems = 1 << i;
+
+//             nutty::DeviceBuffer<uint> a(elems);
+// 
+//             nutty::Fill(a.Begin(), a.End(), rand);
+
+            timer.Start();
+
+            //run_qsort(a.Begin()(), elems);
+            //nutty::Sort(a.Begin(), a.End(), nutty::BinaryDescending<int>());
+
+//             thrust::device_vector<int> ta(elems);
+//             thrust::generate(ta.begin(), ta.end(), rand);
+//             thrust::sort(ta.begin(), ta.end());
+
+            cudaError_t err = cudaDeviceSynchronize();
+
+            timer.Stop();
+
+            if(err != cudaSuccess)
+            {
+                profile << elems << " -> " << cudaGetErrorString(err) << "\n\n";
+                error = true;
+                break;
+            }
+ 
+            times[i - startBit] += timer.GetMillis() / 1000.0; 
+        }
+    }
+
+    for(int i = 0; i < maxBit - startBit; ++i)
+    {
+        times[i] = times[i] / (double) runs;
+    }
+
+    profile << "\n\n";
+
+    for(auto& it : times)
+    {
+        profile << it << "\n";
+    }
+
+    profile.close();
+
     nutty::Release();
 
     return 0;

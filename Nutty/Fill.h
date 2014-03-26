@@ -24,13 +24,4 @@ namespace nutty
     {
         nutty::base::Fill(begin, end, g);
     }
-
-    /*template <
-        typename T,
-        typename Iterator_
-    >
-    void Fill(Iterator_& begin, Iterator_& end, const T& v)
-    {
-        nutty::base::Fill(begin, end, v);
-    }*/
 }

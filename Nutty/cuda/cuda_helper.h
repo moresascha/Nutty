@@ -1,6 +1,5 @@
 #pragma once
 #include <device_launch_parameters.h>
-#include <cuda_runtime.h>
 
 #define NUM_BANKS 32   //fermi / kepler
 #define LOG_NUM_BANKS 5

@@ -24,7 +24,7 @@ int main(void)
     
     //cuMemAlloc(
 
-    nutty::DeviceBuffer<char> memory0(1024 * 1024 * 1024 * 2);
+    nutty::DeviceBuffer<char> memory0(1024 * 1024 * 2);
     nutty::DeviceBuffer<char> memory1(1024 * 1024 * 1024);
     nutty::DeviceBuffer<char> memory2(1024 * 1024 * 1024);
     //nutty::DeviceBuffer<int> memory3(1024 * 1024 * 500);

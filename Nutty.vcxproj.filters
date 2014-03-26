@@ -28,6 +28,9 @@
     <Filter Include="Header Files\interop">
       <UniqueIdentifier>{99d62d5a-6cc1-4c58-a76a-242028f746d4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\profile">
+      <UniqueIdentifier>{8c61d66c-a275-4caa-972d-963f74a68e4c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Nutty\Fill.h">
@@ -143,6 +146,9 @@
     </ClInclude>
     <ClInclude Include="Nutty\cuda\Event.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Nutty\cuTimer.h">
+      <Filter>Header Files\profile</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

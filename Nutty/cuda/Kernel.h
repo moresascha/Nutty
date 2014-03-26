@@ -53,7 +53,7 @@ namespace nutty
         >
         void SetKernelArg(uint index, T& ptr)
         {
-            m_ppArgs[index] = &ptr;
+            m_ppArgs[index] = (void**)&ptr;
                 /*
 #ifdef _DEBUG
             assert(index <= m_argCount);
@@ -81,6 +81,11 @@ namespace nutty
             }
 
             m_ppArgs = tmp; */
+        }
+
+        void SetRawKernelArg(uint index, void** ptr)
+        {
+            m_ppArgs[index] = ptr;
         }
 
         template< 

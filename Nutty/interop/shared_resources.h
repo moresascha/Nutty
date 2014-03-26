@@ -15,17 +15,6 @@ namespace nutty
         MappedPtr(MappedPtr&);
 
         MappedPtr& operator=(MappedPtr&);
-
-        void _delete(void)
-        {
-            CHECK_CNTX();
-            if(m_res)
-            {
-                CUDA_RT_SAFE_CALLING_NO_SYNC(cudaGraphicsUnregisterResource(m_res));
-                m_res = NULL;
-            }
-        }
-
     public:
         MappedPtr(cudaGraphicsResource_t res) : m_res(res), m_size(0)
         {
@@ -72,9 +61,19 @@ namespace nutty
             return m_size;
         }
 
+        void Delete(void)
+        {
+            CHECK_CNTX();
+            if(m_res)
+            {
+                CUDA_RT_SAFE_CALLING_NO_SYNC(cudaGraphicsUnregisterResource(m_res));
+                m_res = NULL;
+            }
+        }
+
         virtual ~MappedPtr(void)
         {
-            _delete();
+            Delete();
         }
     };
 
@@ -95,7 +94,7 @@ namespace nutty
         {
             if(&res != this)
             {
-                _delete();
+                Delete();
                 m_res = res.m_res;
                 m_size = res.m_size;
                 res.m_res = NULL;

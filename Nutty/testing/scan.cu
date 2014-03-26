@@ -15,7 +15,7 @@ std::stringstream g_ss; //te
 
 void print(const int& t)
 {
-	g_ss.str("");
+    g_ss.str("");
     g_ss << t;
     g_ss << " ";
     OutputDebugStringA(g_ss.str().c_str());
@@ -28,16 +28,16 @@ struct scandata
     {
 
     }
-	int operator()()
-	{
-		int r = 1;//rand();
+    int operator()()
+    {
+        int r = 1;//rand();
         if(c > 256)
         {
             r = 0;
         }
         c++;
-		return 1;// % 2;
-	}
+        return 1;// % 2;
+    }
 };
 
 struct Ray
@@ -56,13 +56,13 @@ void printRay(const Ray& r)
 
 struct RayData
 {
-	Ray operator()()
-	{
+    Ray operator()()
+    {
         Ray r;
         r.a = rand() % 10;
         r.b = rand() % 10;
-		return r;
-	}
+        return r;
+    }
 };
 
 int main(void)

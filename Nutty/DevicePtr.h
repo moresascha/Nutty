@@ -15,6 +15,8 @@ namespace nutty
         pointer m_ptr;
 
     public:
+        __device__ __host__ DevicePtr(void) : m_ptr(NULL) { }
+
         __device__ __host__ DevicePtr(const DevicePtr& p) : m_ptr(p.m_ptr) { }
 
         __device__ __host__ DevicePtr(pointer ptr) : m_ptr(ptr) { }
