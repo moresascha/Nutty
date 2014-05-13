@@ -16,6 +16,16 @@ namespace nutty
         private:
             Base_Buffer(const Base_Buffer& b) {}
 
+            void _delete(void)
+            {
+                if(m_ptr)
+                {
+                    m_alloc.Deallocate(m_ptr);
+                }
+                m_size = 0;
+                m_ptr = NULL;
+            }
+
         public:
             Base_Buffer(Base_Buffer&& c) : m_ptr(NULL), m_size(0)
             {
@@ -30,7 +40,7 @@ namespace nutty
             {
                 if(this != &c)
                 {
-                    Clear();
+                    _delete();
 
                     m_ptr = c.m_ptr;
                     m_size = c.m_size;
@@ -55,20 +65,21 @@ namespace nutty
             {
                 m_size = 0;
                 m_ptr = 0;
+                m_pushBackIndex = 0;
             }
 
             Base_Buffer(size_type n)
             {
-                m_size = n;
+                m_size = 0;
                 m_ptr = 0;
-                Resize(m_size);
+                Resize(n);
             }
 
             Base_Buffer(size_type n, const_type_reference t)
             {
-                m_size = n;
+                m_size = 0;
                 m_ptr = 0;
-                Resize(m_size);
+                Resize(n);
                 Fill(Begin(), End(), t);
             }
 
@@ -100,6 +111,11 @@ namespace nutty
 
             void Resize(size_type n)
             {
+                if(n <= m_size)
+                {
+                    return;
+                }
+
                 T* old = m_ptr;
                 size_type cpySize = min(n, m_size);
                 m_ptr = m_alloc.Allocate(n);
@@ -109,16 +125,6 @@ namespace nutty
                     m_alloc.Deallocate(old);
                 }
                 m_size = n;
-            }
-
-            void Clear(void)
-            {
-                if(m_ptr)
-                {
-                    m_alloc.Deallocate(m_ptr);
-                }
-                m_size = 0;
-                m_ptr = NULL;
             }
 
             const_size_typ_reference Size(void) const
@@ -159,18 +165,33 @@ namespace nutty
                 return &m_ptr;
             }
 
-            /*pointer GetRawPointer(void)
+            void PushBack(const_type_reference v)
             {
-                return m_ptr;
-            }*/
+                if(m_pushBackIndex >= m_size)
+                {
+                    Resize(Size() + 1);
+                }
+                Insert(m_pushBackIndex++, v);
+            }
+
+            size_t GetPos(void)
+            {
+                return m_pushBackIndex;
+            }
+
+            void Reset(void)
+            {
+                m_pushBackIndex = 0;
+            }
 
             virtual ~Base_Buffer(void)
             {
-                Clear();
+                _delete();
             }
 
         protected:
             size_t m_size;
+            size_t m_pushBackIndex;
             Allocator m_alloc;
             pointer m_ptr;
             Content m_content;

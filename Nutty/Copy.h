@@ -29,4 +29,13 @@ namespace nutty
     {
         nutty::base::Copy(dst, src, d);
     }
+
+    template <
+        typename IteratorIn,
+        typename IteratorOut
+    >
+    void Copy(IteratorOut& dst, IteratorIn& srcBegin, IteratorIn& srcEnd)
+    {
+        nutty::base::Copy(dst, srcBegin, Distance(srcBegin, srcEnd));
+    }
 }

@@ -19,6 +19,11 @@ namespace nutty
         pointer m_ptr;
 
     public:
+        Iterator(void)
+            : m_ptr(NULL), m_container(NULL)
+        {
+        }
+
         Iterator(pointer ptr, container_pointer container) 
             : m_ptr(ptr), m_container(container)
         {
@@ -138,6 +143,15 @@ namespace nutty
         T* p = i0.m_ptr + i;
         Iterator<T, Container> it(p, i0.m_container);
         return it;
+    }
+
+    template <
+        typename T,
+        typename Container
+    >
+    bool operator<(Iterator<T, Container>& i0, Iterator<T, Container>& i1)
+    {
+        return i0.m_ptr < i1.m_ptr;
     }
 
     template <

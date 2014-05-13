@@ -60,6 +60,16 @@ namespace nutty
     }
 
     template <
+        typename T,
+        typename C
+    >
+    __host__ __forceinline void ZeroMem(Iterator<T, C>& begin, Iterator<T, C>& end)
+    {
+        size_t d = Distance(begin, end);
+        CUDA_RT_SAFE_CALLING_NO_SYNC(cudaMemset(begin(), 0, d * sizeof(T)));
+    }
+
+    template <
         template <class, class, class> class Buffer,
         class T,
         template <class> class Container,

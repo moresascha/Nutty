@@ -54,7 +54,8 @@ namespace nutty
     {
         if(g_CudaContext)
         {
-            CUDA_DRIVER_SAFE_CALLING_NO_SYNC(cuCtxDestroy(g_CudaContext));
+            cudaDeviceReset();
+            //CUDA_DRIVER_SAFE_CALLING_NO_SYNC(cuCtxDestroy(g_CudaContext));
             g_CudaContext = NULL;
         }
     }

@@ -22,7 +22,6 @@ namespace nutty
             nutty::cuda::Copy(dst(), src(), d, cudaMemcpyHostToDevice);
         }
 
-
         template <
             typename T
         >
@@ -78,7 +77,7 @@ namespace nutty
                 >& src, 
         size_t d)
         {
-            memcpy(dst(), src(), d);
+            memcpy(dst(), src(), sizeof(T) * d);
         }
 
         template <

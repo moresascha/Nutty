@@ -152,26 +152,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="Nutty\testing\sort.cu">
-      <Filter>Header Files\test</Filter>
-    </CudaCompile>
-    <CudaCompile Include="Nutty\testing\reduce.cu">
-      <Filter>Header Files\test</Filter>
-    </CudaCompile>
-    <CudaCompile Include="Nutty\testing\reduce_range.cu">
-      <Filter>Header Files\test</Filter>
-    </CudaCompile>
-    <CudaCompile Include="Nutty\testing\scan.cu">
-      <Filter>Header Files\test</Filter>
-    </CudaCompile>
-    <CudaCompile Include="Nutty\testing\reduce_index.cu">
-      <Filter>Header Files\test</Filter>
-    </CudaCompile>
-    <CudaCompile Include="Nutty\testing\memalloc.cu">
-      <Filter>Header Files\test</Filter>
-    </CudaCompile>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Nutty\cuda\Globals.cuh">
       <Filter>Header Files\cuda</Filter>
     </None>
@@ -180,5 +160,25 @@
     <ClCompile Include="Nutty\internal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="Nutty\testing\memalloc.cu">
+      <Filter>Header Files\test</Filter>
+    </CudaCompile>
+    <CudaCompile Include="Nutty\testing\reduce.cu">
+      <Filter>Header Files\test</Filter>
+    </CudaCompile>
+    <CudaCompile Include="Nutty\testing\reduce_index.cu">
+      <Filter>Header Files\test</Filter>
+    </CudaCompile>
+    <CudaCompile Include="Nutty\testing\reduce_range.cu">
+      <Filter>Header Files\test</Filter>
+    </CudaCompile>
+    <CudaCompile Include="Nutty\testing\scan.cu">
+      <Filter>Header Files\test</Filter>
+    </CudaCompile>
+    <CudaCompile Include="Nutty\testing\sort.cu">
+      <Filter>Header Files\test</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

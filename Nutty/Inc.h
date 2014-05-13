@@ -3,7 +3,7 @@
 #include <map>
 #include <string>
 #include <cuda.h>
-#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 #include <vector>
 #include <vector_types.h>
 #include "inc/drvapi_error_string.h"
@@ -25,7 +25,7 @@ namespace cudahErrorLog
     }
 }
 
-#if defined _DEBUG
+#ifdef NUTTY_DEBUG
     #define CUDA_SAFE
 #endif
 
