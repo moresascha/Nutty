@@ -57,7 +57,7 @@ namespace nutty
             typedef const pointer const_pointer;
             typedef T& type_reference;
             typedef Iterator<T, Base_Buffer<T, Content, Allocator>> iterator;
-            typedef const Iterator<T, Base_Buffer<T, Content, Allocator>> const_iterator;
+            typedef const Iterator<const T, const Base_Buffer<T, Content, Allocator>> const_iterator;
             typedef size_t size_type;
             typedef const size_type& const_size_typ_reference;
 
@@ -72,6 +72,7 @@ namespace nutty
             {
                 m_size = 0;
                 m_ptr = 0;
+                m_pushBackIndex = 0;
                 Resize(n);
             }
 
@@ -79,6 +80,7 @@ namespace nutty
             {
                 m_size = 0;
                 m_ptr = 0;
+                m_pushBackIndex = 0;
                 Resize(n);
                 Fill(Begin(), End(), t);
             }
@@ -117,11 +119,13 @@ namespace nutty
                 }
 
                 T* old = m_ptr;
-                size_type cpySize = min(n, m_size);
+                size_type cpySize = n < m_size ? n : m_size; //(size_type)min(n, m_size);
                 m_ptr = m_alloc.Allocate(n);
                 if(old)
                 {
-                    Copy(Begin(), const_iterator(old, this), cpySize);
+                    const_iterator b(old, this);
+                    const_iterator e(old + cpySize, this);
+                    Copy(Begin(), b, e);
                     m_alloc.Deallocate(old);
                 }
                 m_size = n;
@@ -172,6 +176,19 @@ namespace nutty
                     Resize(Size() + 1);
                 }
                 Insert(m_pushBackIndex++, v);
+            }
+
+            template <
+                class A,
+                template <class A> class Ptr
+            >
+            void PushBack(const Ptr<A>& src, size_t d)
+            {
+                if(GetPos() + d >= Size())
+                {
+                    Resize(Size() + d);
+                }
+                Copy(Begin() + GetPos(), src, d);
             }
 
             size_t GetPos(void)

@@ -162,6 +162,7 @@
     <ClInclude Include="Nutty\DevicePtr.h" />
     <ClInclude Include="Nutty\Functions.h" />
     <ClInclude Include="Nutty\HostBuffer.h" />
+    <ClInclude Include="Nutty\HostPtr.h" />
     <ClInclude Include="Nutty\inc\drvapi_error_string.h" />
     <ClInclude Include="Nutty\interop\D3DInterop.h" />
     <ClInclude Include="Nutty\interop\shared_resources.h" />
@@ -174,6 +175,7 @@
     <ClInclude Include="Nutty\cuda\Kernel.h" />
     <ClInclude Include="Nutty\cuda\Module.h" />
     <ClInclude Include="Nutty\cuda\Record.h" />
+    <ClInclude Include="Nutty\Pointer.h" />
     <ClInclude Include="Nutty\Reduce.h" />
     <ClInclude Include="Nutty\Scan.h" />
     <ClInclude Include="Nutty\Sort.h" />

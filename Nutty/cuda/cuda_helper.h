@@ -61,9 +61,9 @@ namespace nutty
 
     template <
         typename T,
-        typename C
+        class Iterator
     >
-    __host__ __forceinline void ZeroMem(Iterator<T, C>& begin, Iterator<T, C>& end)
+    __host__ __forceinline void ZeroMem(Iterator& begin, Iterator& end)
     {
         size_t d = Distance(begin, end);
         CUDA_RT_SAFE_CALLING_NO_SYNC(cudaMemset(begin(), 0, d * sizeof(T)));

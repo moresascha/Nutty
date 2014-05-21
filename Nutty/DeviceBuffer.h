@@ -16,7 +16,6 @@ namespace nutty
         typedef size_t size_type;
 
     public:
-
         template<
             typename C
         >
@@ -39,7 +38,7 @@ namespace nutty
         void Insert(Iterator<T, C>& start, Iterator<T, C>& end, const_type_reference v)
         {
             size_t d = Distance(start, end);
-            Copy(start, d, v);
+            Copy(start, end, v, d);
         }
 
         template<
@@ -48,7 +47,7 @@ namespace nutty
         T operator[](Iterator<T, C>& it)
         {
             HostBuffer<T> host(1);
-            Copy(host.Begin(), it, 1);
+            Copy(host.Begin(), it, it+1);
             return host[0];
         }
     };
@@ -61,11 +60,9 @@ namespace nutty
         : public nutty::base::Base_Buffer<T, DeviceContent<T>, Allocator>
     {
 
-         typedef nutty::base::Base_Buffer<T, DeviceContent<T>, Allocator> base_class;
-
     public:
 
-        typedef DeviceBuffer<T, NullAllocator<T>> MappedDeviceBuffer;
+        typedef nutty::base::Base_Buffer<T, DeviceContent<T>, Allocator> base_class;
 
         DeviceBuffer(size_type n) 
             : base_class(n)

@@ -25,16 +25,7 @@ namespace nutty
         typename IteratorIn,
         typename IteratorOut
     >
-    void Copy(IteratorOut& dst, IteratorIn& src, size_t d)
-    {
-        nutty::base::Copy(dst, src, d);
-    }
-
-    template <
-        typename IteratorIn,
-        typename IteratorOut
-    >
-    void Copy(IteratorOut& dst, IteratorIn& srcBegin, IteratorIn& srcEnd)
+    void Copy(IteratorOut& dst, const IteratorIn& srcBegin, const IteratorIn& srcEnd)
     {
         nutty::base::Copy(dst, srcBegin, Distance(srcBegin, srcEnd));
     }

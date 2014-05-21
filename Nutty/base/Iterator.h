@@ -9,6 +9,7 @@ namespace nutty
     class Iterator
     {
         typedef T* pointer;
+        typedef const pointer const_pointer;
         typedef Container* container_pointer;
         typedef const T& const_type_reference;
         typedef T& type_reference;
@@ -75,7 +76,7 @@ namespace nutty
             return m_ptr;
         }
 
-        pointer operator()(void) const
+        const_pointer operator()(void) const
         {
             return m_ptr;
         }
@@ -89,32 +90,32 @@ namespace nutty
             typename T, 
             typename Container
         >
-        friend Iterator<T, Container> operator+(Iterator<T, Container>& i0, Iterator<T, Container>& i1);
+        friend Iterator<T, Container> operator+(const Iterator<T, Container>& i0, const Iterator<T, Container>& i1);
 
         template <
             typename T, 
             typename Container
         >
-        friend Iterator<T, Container> operator-(Iterator<T, Container>& i0, Iterator<T, Container>& i1);
+        friend Iterator<T, Container> operator-(const Iterator<T, Container>& i0, const Iterator<T, Container>& i1);
 
         template <
             typename T,
             typename Container
         >
-        friend Iterator<T, Container> operator+(Iterator<T, Container>& i0, size_type i);
+        friend Iterator<T, Container> operator+(const Iterator<T, Container>& i0, size_type i);
 
         template <
             typename T,
             typename Container
         >
-        friend Iterator<T, Container> operator-(Iterator<T, Container>& i0, size_type i);
+        friend Iterator<T, Container> operator-(const Iterator<T, Container>& i0, size_type i);
     };
 
     template <
         typename T, 
         typename Container
     >
-    Iterator<T, Container> operator+(Iterator<T, Container>& i0, Iterator<T, Container>& i1)
+    Iterator<T, Container> operator+(const Iterator<T, Container>& i0, const Iterator<T, Container>& i1)
     {
         assert(i0.m_container == i1.m_container);
         T* p = i0.m_ptr + i1.m_ptr;
@@ -126,7 +127,7 @@ namespace nutty
         typename T, 
         typename Container
     >
-    Iterator<T, Container> operator-(Iterator<T, Container>& i0, Iterator<T, Container>& i1)
+    Iterator<T, Container> operator-(const Iterator<T, Container>& i0, const Iterator<T, Container>& i1)
     {
         assert(i0.m_container == i1.m_container);
         T* p = i0.m_ptr - i1.m_ptr;
@@ -138,7 +139,7 @@ namespace nutty
         typename T,
         typename Container
     >
-    Iterator<T, Container> operator+(Iterator<T, Container>& i0, typename Iterator<T, Container>::size_type i)
+    Iterator<T, Container> operator+(const Iterator<T, Container>& i0, typename Iterator<T, Container>::size_type i)
     {
         T* p = i0.m_ptr + i;
         Iterator<T, Container> it(p, i0.m_container);
@@ -149,7 +150,7 @@ namespace nutty
         typename T,
         typename Container
     >
-    bool operator<(Iterator<T, Container>& i0, Iterator<T, Container>& i1)
+    bool operator<(const Iterator<T, Container>& i0, const Iterator<T, Container>& i1)
     {
         return i0.m_ptr < i1.m_ptr;
     }
@@ -158,7 +159,7 @@ namespace nutty
         typename T, 
         typename Container
     >
-    Iterator<T, Container> operator-(Iterator<T, Container>& i0, typename Iterator<T, Container>::size_type i)
+    Iterator<T, Container> operator-(const Iterator<T, Container>& i0, typename Iterator<T, Container>::size_type i)
     {
         T* p = i0.m_ptr - i;
         Iterator<T, Container> it(p, i0.m_container);
@@ -170,15 +171,6 @@ namespace nutty
         typename C
     >
     size_t Distance(const Iterator<T, C>& begin, const Iterator<T, C>& end)
-    {
-        return (end() - begin());
-    }
-
-    template <
-        typename T,
-        typename C
-    >
-    size_t Distance(Iterator<T, C>& begin, Iterator<T, C>& end)
     {
         return (end() - begin());
     }

@@ -38,29 +38,30 @@ int main(void)
     ss << "count=" << count << "\n";
     OutputDebugStringA(ss.str().c_str());
     //create device memory (1.048.576 elements)
-    
+    nutty::DeviceBuffer<int> a(10);
+
     //fill device memory with random numbers
-    for(int i = 17; i <= 1 << 20; ++i)
-    {
-        ss.str("");
-        ss << i << "\n";
-        OutputDebugStringA(ss.str().c_str());
-        nutty::DeviceBuffer<int> a(i);
-        nutty::Fill(a.Begin(), a.End(), nutty::unary::Sequence<int>());
-        nutty::Reduce(a.Begin(), a.End(), nutty::binary::Max<int>());
-        
-        uint r = a[0];
-        if(r != i-1)
-        {
-            ss.str("");
-            ss << (i-1);
-            ss << " != ";
-            ss << r << "\n";
-            OutputDebugStringA(ss.str().c_str());
-            nutty::ForEach(a.Begin(), a.End(), print);
-            break;
-        }
-    }
+//     for(int i = 17; i <= 1 << 20; ++i)
+//     {
+//         ss.str("");
+//         ss << i << "\n";
+//         OutputDebugStringA(ss.str().c_str());
+//         nutty::DeviceBuffer<int> a(i);
+//         nutty::Fill(a.Begin(), a.End(), nutty::unary::Sequence<int>());
+//         nutty::Reduce(a.Begin(), a.End(), nutty::binary::Max<int>(), 0);
+//         
+//         uint r = a[0];
+//         if(r != i-1)
+//         {
+//             ss.str("");
+//             ss << (i-1);
+//             ss << " != ";
+//             ss << r << "\n";
+//             OutputDebugStringA(ss.str().c_str());
+//             //nutty::ForEach(a.Begin(), a.End(), print);
+//             break;
+//         }
+//     }
     
     //release nutty
     nutty::Release();

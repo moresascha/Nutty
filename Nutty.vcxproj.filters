@@ -150,6 +150,12 @@
     <ClInclude Include="Nutty\cuTimer.h">
       <Filter>Header Files\profile</Filter>
     </ClInclude>
+    <ClInclude Include="Nutty\Pointer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Nutty\HostPtr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Nutty\cuda\Globals.cuh">

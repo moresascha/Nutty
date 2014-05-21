@@ -42,7 +42,7 @@ namespace nutty
         template<
             typename C
         >
-        T operator[](Iterator<T, C>& index)
+        T operator[](const Iterator<T, C>& index)
         {
             return *(index());
         }
@@ -54,10 +54,10 @@ namespace nutty
     class HostBuffer 
         : public nutty::base::Base_Buffer<T, HostContent<T>>
     {
-
+    public:
+        
         typedef nutty::base::Base_Buffer<T, HostContent<T>> base_class;
 
-    public:
         HostBuffer(size_type n) 
             : base_class(n)
         {
