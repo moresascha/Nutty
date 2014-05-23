@@ -108,9 +108,6 @@
     <ClInclude Include="Nutty\cuda\reduce.h">
       <Filter>Header Files\cuda</Filter>
     </ClInclude>
-    <ClInclude Include="Nutty\base\Content.h">
-      <Filter>Header Files\base</Filter>
-    </ClInclude>
     <ClInclude Include="Nutty\base\fill.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
@@ -161,6 +158,9 @@
     <None Include="Nutty\cuda\Globals.cuh">
       <Filter>Header Files\cuda</Filter>
     </None>
+    <None Include="Nutty\testing\test_help.cuh">
+      <Filter>Header Files\test</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Nutty\internal.cpp">
@@ -180,7 +180,19 @@
     <CudaCompile Include="Nutty\testing\reduce_range.cu">
       <Filter>Header Files\test</Filter>
     </CudaCompile>
-    <CudaCompile Include="Nutty\testing\scan.cu">
+    <CudaCompile Include="Nutty\testing\memshift.cu">
+      <Filter>Header Files\test</Filter>
+    </CudaCompile>
+    <CudaCompile Include="Nutty\testing\compact.cu">
+      <Filter>Header Files\test</Filter>
+    </CudaCompile>
+    <CudaCompile Include="Nutty\testing\i_scan.cu">
+      <Filter>Header Files\test</Filter>
+    </CudaCompile>
+    <CudaCompile Include="Nutty\testing\e_scan.cu">
+      <Filter>Header Files\test</Filter>
+    </CudaCompile>
+    <CudaCompile Include="Nutty\testing\sort_profile.cu">
       <Filter>Header Files\test</Filter>
     </CudaCompile>
     <CudaCompile Include="Nutty\testing\sort.cu">

@@ -44,7 +44,27 @@ namespace nutty
         template<
             typename C
         >
-        T operator[](Iterator<T, C>& it)
+        T operator[](Iterator<const T, const C>& it) const
+        {
+            HostBuffer<T> host(1);
+            Copy(host.Begin(), it, it+1);
+            return host[0];
+        }
+
+        template<
+            typename C
+        >
+        T operator[](const Iterator<T, C>& it) const
+        {
+            HostBuffer<T> host(1);
+            Copy(host.Begin(), it, it+1);
+            return host[0];
+        }
+
+        template<
+            typename C
+        >
+        T operator[](const Iterator<const T, const C>& it) const
         {
             HostBuffer<T> host(1);
             Copy(host.Begin(), it, it+1);

@@ -6,8 +6,8 @@
 
 #include "../Inc.h"
 #include "../ForEach.h"
+#include "../Scan.h"
 #include "../Functions.h"
-
 
 int main(void)
 {
@@ -15,20 +15,29 @@ int main(void)
     _CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
     _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
     _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
-#endif 
+#endif
 
     //create nutty
-    nutty::Init();
+    nutty::Init(); 
 
-    //create device memory (1.048.576 elements)
-    nutty::DeviceBuffer<int> data(10);
+    nutty::DeviceBuffer<int> data(20);
 
     nutty::Fill(data.Begin(), data.End(), nutty::unary::Sequence<int>());
 
-    nutty::Reduce(data.Begin(), data.End(), nutty::binary::Max<int>(), 0);
+    for(int i = 0; i < data.Size(); ++i)
+    {
+        print(data[i]);
+    }
 
-    print(data[0]);
-    
+    OutputDebugStringA("\n");
+
+    //nutty::cuda::shiftMemory<int, 1><<<2, 10, 10 * sizeof(int)>>>(data.Begin()(), data.Size());
+
+    for(int i = 0; i < data.Size(); ++i)
+    {
+        print(data[i]);
+    }
+
     //release nutty
     nutty::Release();
 

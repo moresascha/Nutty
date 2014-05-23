@@ -23,7 +23,7 @@ int i = 0;
 
 int randi(void)
 {
-    return elementCount - (i++); //(rand()%10);
+    return elementCount - (i++);
 }
 
 int main(void)

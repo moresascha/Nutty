@@ -81,9 +81,9 @@ namespace nutty
             return m_ptr;
         }
 
-        T operator*(void)
+        T operator*(void) const
         {
-            return (*m_container)[*this];
+            return m_container->m_content.operator[](*this);
         }
 
         template <

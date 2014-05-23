@@ -13,6 +13,7 @@ namespace nutty
         >
         class Base_Buffer
         {
+            friend class Iterator<T, Base_Buffer<T, Content, Allocator>>;
         private:
             Base_Buffer(const Base_Buffer& b) {}
 
@@ -57,7 +58,7 @@ namespace nutty
             typedef const pointer const_pointer;
             typedef T& type_reference;
             typedef Iterator<T, Base_Buffer<T, Content, Allocator>> iterator;
-            typedef const Iterator<const T, const Base_Buffer<T, Content, Allocator>> const_iterator;
+            typedef Iterator<const T, const Base_Buffer<T, Content, Allocator>> const_iterator;
             typedef size_t size_type;
             typedef const size_type& const_size_typ_reference;
 
@@ -151,16 +152,20 @@ namespace nutty
                 Insert(Begin() + pos, v);
             }
 
-            T operator[](iterator it)
+//             void Insert(size_type pos, T v)
+//             {
+//                 m_content.Insert(Begin() + pos, v);
+//             }
+
+            T operator[](const_iterator it) const
             {
                 return m_content[it];
             }
 
-            T operator[](size_type index)
+            T operator[](size_type index) const
             {
                 assert(index < m_size);
-                iterator it = Begin();
-                it += index;
+                const_iterator it = Begin() + index;
                 return operator[](it);
             }
 
@@ -189,6 +194,7 @@ namespace nutty
                     Resize(Size() + d);
                 }
                 Copy(Begin() + GetPos(), src, d);
+                m_pushBackIndex += d;
             }
 
             size_t GetPos(void)
@@ -199,6 +205,11 @@ namespace nutty
             void Reset(void)
             {
                 m_pushBackIndex = 0;
+            }
+
+            size_t ByteCount(void) const
+            {
+                return Size() * sizeof(T);
             }
 
             virtual ~Base_Buffer(void)

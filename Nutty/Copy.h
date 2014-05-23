@@ -18,7 +18,7 @@ namespace nutty
     >
     void Copy(IteratorOut& begin, const T& t)
     {
-        Copy(begin, t, 1);
+        nutty::base::Copy(begin, t, 1);
     }
 
     template <

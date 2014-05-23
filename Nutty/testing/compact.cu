@@ -76,7 +76,6 @@ int main(void)
     //create nutty
     nutty::Init(); 
 
-   // while(1)
     {
         srand(NULL);
         size_t size = 512*10; 
@@ -87,8 +86,8 @@ int main(void)
         nutty::DeviceBuffer<int> mask(size, 0);
         nutty::Fill(mask.Begin(), mask.End(), scandata());
 
-//         nutty::ForEach(mask.Begin(), mask.End(), print);
-//         OutputDebugStringA("\n");
+        /*nutty::ForEach(mask.Begin(), mask.End(), print);
+         OutputDebugStringA("\n"); */
 
         nutty::DeviceBuffer<int> scannedMask(size, 0); 
         nutty::DeviceBuffer<int> sums(max(1, (int)(size/512)), 0);
@@ -102,11 +101,14 @@ int main(void)
 
         /*nutty::ForEach(scannedMask.Begin(), scannedMask.End(), print);
         OutputDebugStringA("\n");*/
+
         nutty::ForEach(sums.Begin(), sums.End(), print);
         OutputDebugStringA("\n");
+
         /*
         nutty::ForEach(rays.Begin(), rays.End(), printRay);
         OutputDebugStringA("\n");}*/
+
         int t = *(scannedMask.End()-1);
         
         print(t);

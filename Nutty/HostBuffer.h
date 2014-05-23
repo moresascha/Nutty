@@ -42,7 +42,23 @@ namespace nutty
         template<
             typename C
         >
-        T operator[](const Iterator<T, C>& index)
+        T operator[](const Iterator<const T, const C>& index) const
+        {
+            return *(index());
+        }
+
+        template<
+            typename C
+        >
+        T operator[](Iterator<const T, const C>& index) const
+        {
+            return *(index());
+        }
+
+        template<
+            typename C
+        >
+        T operator[](const Iterator<T, C>& index) const
         {
             return *(index());
         }

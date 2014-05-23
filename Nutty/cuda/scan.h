@@ -4,48 +4,51 @@
 
 namespace nutty
 {
+    template <
+        class T, T neutral
+    >
+    struct CompactScanOp
+    {
+        __device__ T operator()(T elem)
+        {
+            return elem == neutral ? 0 : 1;
+        }
+
+        T GetNeutral(void)
+        {
+            return neutral;
+        }
+    };
+
+    template <
+        typename T
+    >
+    struct PrefixSumOp
+    {
+        __device__ T operator()(T elem)
+        {
+            return elem;
+        }
+
+        T GetNeutral(void)
+        {
+            return 0;
+        }
+    };
+
     namespace cuda
     {
         template <
-            class T, T neutral
-        >
-        struct CompactScanOp
-        {
-            __device__ T operator()(T elem)
-            {
-                return elem == neutral ? 0 : 1;
-            }
-
-            T GetNeutral(void)
-            {
-                return neutral;
-            }
-        };
-
-        template <
-            typename T
-        >
-        struct PrefixSumOp
-        {
-            __device__ T operator()(T elem)
-            {
-                return elem;
-            }
-
-            T GetNeutral(void)
-            {
-                return 0;
-            }
-        };
-
-        template <
             typename T,
-            typename Oprator
+            typename I,
+            typename Operator,
+            int WRITE_SUM,
+            int IS_INCLUSIVE
         >
-        __global__ void _exclusiveScan(Oprator op, T* content, T* scanned, T* sums, T neutralItem, uint startStage, uint length, byte writeSums)
+        __global__ void _scan(Operator op, const T* content, I* scanned, I* sums, T neutralItem, uint startStage, uint length)
         {
-            ShrdMemory<T> s_mem;
-            T* shrdMem = s_mem.Ptr();
+            ShrdMemory<I> s_mem;
+            I* shrdMem = s_mem.Ptr();
 
             uint thid = threadIdx.x;
             uint grpId = blockIdx.x;
@@ -74,8 +77,8 @@ namespace nutty
             uint bankOffsetA = CONFLICT_FREE_OFFSET(ai);
             uint bankOffsetB = CONFLICT_FREE_OFFSET(bi);*/
 
-            shrdMem[2 * (blockDim.x - thid - 1) + 0] = op(i1); //i1 == neutralItem ? 0 : (neutralItem==-2 ? i1 : 1);
-            shrdMem[2 * (blockDim.x - thid - 1) + 1] = op(i0); //i0 == neutralItem ? 0 : (neutralItem==-2 ? i0 : 1);
+            shrdMem[2 * (blockDim.x - thid - 1) + 0] = (I)op(i1); //i1 == neutralItem ? 0 : (neutralItem==-2 ? i1 : 1);
+            shrdMem[2 * (blockDim.x - thid - 1) + 1] = (I)op(i0); //i0 == neutralItem ? 0 : (neutralItem==-2 ? i0 : 1);
 
             T last = op(i1); // == neutralItem ? 0 : 1;
 
@@ -122,7 +125,40 @@ namespace nutty
                 __syncthreads();
             }
 
-            int elemsLeft = 2 * blockDim.x ;
+            int elemsLeft = 2 * blockDim.x;
+
+            __shared__ I tmp;
+
+            if(IS_INCLUSIVE)
+            {
+                int dst1 = (2*thid) + 2;
+                I s0 = shrdMem[(2*thid) + 0];
+                I s1 = shrdMem[(2*thid) + 1];
+
+                __syncthreads();
+
+                if(dst1 < elemsLeft)
+                {
+                    shrdMem[dst1] = s1;
+                }
+
+                shrdMem[(2*thid) + 1] = s0;
+                                
+                __syncthreads();
+
+                if(gpos1 == length-1 || gpos0 == length-1)
+                {
+                    tmp = gpos1 == length-1 ? op(i1) : op(i0);
+                    shrdMem[0] += gpos1 == length-1 ? op(i1) : op(i0);
+                }
+                else if(thid == blockDim.x - 1)
+                {
+                    tmp = i1;
+                    shrdMem[0] += op(i1);
+                }
+
+                __syncthreads();
+            }
 
             if(gpos0 < length)
             {
@@ -134,10 +170,17 @@ namespace nutty
                 scanned[gpos1] = shrdMem[elemsLeft - 1 - (2*thid+1)];
             }
 
-            if(thid == blockDim.x-1 && writeSums)
+            if(WRITE_SUM && thid == blockDim.x-1)
             {
-                T _t = shrdMem[0];
-                sums[blockIdx.x] = _t + last;
+                I _t = shrdMem[0];
+                if(IS_INCLUSIVE)
+                {
+                    sums[blockIdx.x] = _t - tmp;
+                }
+                else
+                {
+                    sums[blockIdx.x] = _t + last;
+                }
             }
         }
 
@@ -145,7 +188,7 @@ namespace nutty
             typename T,
             typename ST
         >
-        __device__ void _compact(T* compactedContent, T* content, ST* mask, ST* scanned, ST neutral, uint N)
+        __device__ void _compact(T* compactedContent, const T* content, const ST* mask, const ST* scanned, ST neutral, uint N)
         {
             uint id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -190,33 +233,37 @@ namespace nutty
             scanned[gid] = scanned[gid] + prefixSum[grpId+1];
         }
 
-        const static size_t ELEMS_PER_BLOCK = 512;
-
-        template <
-            typename T
-        >
-        void ExclusivePrefixSumScan(T* begin, T* prefixSum, T* sums, size_t d)
-        {
-            PrefixSumOp<T> op;
-            
-            dim3 grid = cuda::GetCudaGrid(d, ELEMS_PER_BLOCK);
-
-            if(grid.x == 1)
-            {
-                ExclusiveScan(begin, prefixSum, sums, (T*)NULL, d, op);
-                return;
-            }
-
-            nutty::DeviceBuffer<T> scannedSums(grid.x, op.GetNeutral());
-
-            ExclusiveScan(begin, prefixSum, sums, scannedSums.Begin()(), d, op);
-
-            grid.x = grid.x - 1;
-
-            assert(grid.x > 0);
-
-            spreadSums<<<grid, ELEMS_PER_BLOCK, 0, 0>>>(prefixSum, scannedSums.Begin()(), d);
-        }
+//         template <
+//             typename T,
+//             int steps
+//         >
+//         __global__ void shiftMemory(T* memory, uint length)
+//         {
+//             uint id = threadIdx.x + blockIdx.x * blockDim.x;
+// 
+//             extern __shared__ T s_data[];
+// 
+//             if(id >= length)
+//             {
+//                 return;
+//             }
+// 
+//             s_data[threadIdx.x] = memory[id];
+// 
+//             __syncthreads();
+// 
+//             if(steps < 0 && (int)threadIdx.x + steps <= 0)
+//             {
+//                 return;
+//             }
+// 
+//             if(steps > 0 && (int)threadIdx.x + steps >= blockDim.x)
+//             {
+//                 return;
+//             }
+// 
+//             memory[id + steps] = s_data[threadIdx.x];
+//         }
 
         template <
             typename T,
@@ -228,11 +275,25 @@ namespace nutty
             compact<<<grid.x, 256, 0, 0>>>(dst, src, mask, scanned, neutralElement, d);
         }
 
+        const static size_t ELEMS_PER_BLOCK = 512;
+
         template <
             typename T,
-            typename Operation
+            typename I
         >
-        void ExclusiveScan(T* begin, T* scanned, T* sums, T* scannedSums, size_t d, Operation op)
+        void ExclusivePrefixSumScan(T* begin, I* prefixSum, I* sums, size_t d)
+        {
+           PrefixSumOp<T> op;
+           _ExclusiveScan(begin, prefixSum, sums, d, op);
+        }
+
+        template <
+            typename T,
+            typename I,
+            typename Operation,
+            int TYPE
+        >
+        void __Scan(T* begin, I* scanned, I* sums, I* scannedSums, size_t d, Operation op)
         {
             size_t elementsPerBlock = ELEMS_PER_BLOCK;
 
@@ -251,7 +312,7 @@ namespace nutty
                 startStage = 1ULL << (GetMSB(startStage) + 1);
             }
 
-            _exclusiveScan<<<grid, block, elementsPerBlock * sizeof(T), 0>>>(op, begin, scanned, sums, op.GetNeutral(), startStage, d, 1);
+            _scan<T, I, Operation, 1, TYPE><<<grid, block, elementsPerBlock * sizeof(I), 0>>>(op, begin, scanned, sums, op.GetNeutral(), startStage, d);
 
             if(grid.x == 1)
             {
@@ -267,7 +328,56 @@ namespace nutty
                 startStage = 1ULL << (GetMSB(startStage) + 1);
             }
 
-             _exclusiveScan<<<1, sumBlock, 2 * sumBlock.x * sizeof(T), 0>>>(op, sums, scannedSums, (T*)NULL, op.GetNeutral(), startStage, grid.x, 0);
+            PrefixSumOp<I> _op;
+
+            _scan<I, I, PrefixSumOp<I>, 0, 0><<<1, sumBlock, 2 * sumBlock.x * sizeof(I), 0>>>(_op, sums, scannedSums, (I*)NULL, _op.GetNeutral(), startStage, grid.x);
+        }
+
+        template <
+            typename T,
+            typename I,
+            typename Operator,
+            int TYPE
+        >
+        void _Scan(T* begin, I* prefixSum, I* sums, size_t d, Operator op)
+        {            
+            dim3 grid = cuda::GetCudaGrid(d, ELEMS_PER_BLOCK);
+
+            if(grid.x == 1)
+            {
+                __Scan<T, I, Operator, TYPE>(begin, prefixSum, sums, (I*)NULL, d, op);
+                return;
+            }
+
+            nutty::DeviceBuffer<I> scannedSums(grid.x, op.GetNeutral());
+
+            __Scan<T, I, Operator, TYPE>(begin, prefixSum, sums, scannedSums.Begin()(), d, op);
+
+            grid.x = grid.x - 1;
+
+            assert(grid.x > 0);
+
+            spreadSums<<<grid, ELEMS_PER_BLOCK, 0, 0>>>(prefixSum, scannedSums.Begin()(), d);
+        }
+
+        template <
+            typename T,
+            typename I,
+            typename Operator
+        >
+        void _ExclusiveScan(T* begin, I* prefixSum, I* sums, size_t d, Operator op)
+        {            
+            _Scan<T, I, Operator, 0>(begin, prefixSum, sums, d, op);
+        }
+
+        template <
+            typename T,
+            typename I,
+            typename Operator
+        >
+        void _InclusiveScan(T* begin, I* prefixSum, I* sums, size_t d, Operator op)
+        {            
+            _Scan<T, I, Operator, 1>(begin, prefixSum, sums, d, op);
         }
     }
 }
