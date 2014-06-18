@@ -14,7 +14,7 @@ namespace nutty
             return elem == neutral ? 0 : 1;
         }
 
-        T GetNeutral(void)
+        __device__ __host__ T GetNeutral(void)
         {
             return neutral;
         }
@@ -30,7 +30,7 @@ namespace nutty
             return elem;
         }
 
-        T GetNeutral(void)
+        __device__ __host__ T GetNeutral(void)
         {
             return 0;
         }
@@ -71,14 +71,14 @@ namespace nutty
             }
 
             //todo
-            /*uint ai = thid;
-            uint bi = thid + (n/2);
+//             uint ai = thid;
+//             uint bi = thid + (2 * blockDim.x/2);
 
-            uint bankOffsetA = CONFLICT_FREE_OFFSET(ai);
-            uint bankOffsetB = CONFLICT_FREE_OFFSET(bi);*/
+            uint bankOffsetA = 0; // CONFLICT_FREE_OFFSET(ai);
+            uint bankOffsetB = 0; //CONFLICT_FREE_OFFSET(bi);
 
-            shrdMem[2 * (blockDim.x - thid - 1) + 0] = (I)op(i1); //i1 == neutralItem ? 0 : (neutralItem==-2 ? i1 : 1);
-            shrdMem[2 * (blockDim.x - thid - 1) + 1] = (I)op(i0); //i0 == neutralItem ? 0 : (neutralItem==-2 ? i0 : 1);
+            shrdMem[2 * (blockDim.x - thid - 1) + 0 - bankOffsetA] = (I)op(i1); //i1 == neutralItem ? 0 : (neutralItem==-2 ? i1 : 1);
+            shrdMem[2 * (blockDim.x - thid - 1) + 1 - bankOffsetB] = (I)op(i0); //i0 == neutralItem ? 0 : (neutralItem==-2 ? i0 : 1);
 
             T last = op(i1); // == neutralItem ? 0 : 1;
 
@@ -92,6 +92,10 @@ namespace nutty
                 {
                     int ai = offset*(2*thid);  
                     int bi = offset*(2*thid+1);  
+                    
+                    //ai += CONFLICT_FREE_OFFSET(ai);
+                    //bi += CONFLICT_FREE_OFFSET(bi);
+
                     if(bi < 2 * blockDim.x)
                     {
                         shrdMem[ai] += shrdMem[bi];
@@ -103,7 +107,7 @@ namespace nutty
 
             if(thid == 0) 
             { 
-                shrdMem[0] = 0;
+                shrdMem[0 /*+ CONFLICT_FREE_OFFSET(2 * blockDim.x)*/] = 0;
             }
 
             __syncthreads();
@@ -113,7 +117,11 @@ namespace nutty
                 if(thid < i)
                 {
                     int ai = offset*(2*thid);  
-                    int bi = offset*(2*thid+1); 
+                    int bi = offset*(2*thid+1);
+
+                    //ai += CONFLICT_FREE_OFFSET(ai);
+                    //bi += CONFLICT_FREE_OFFSET(bi);
+
                     if(bi < 2 * blockDim.x)
                     {
                         int t = shrdMem[ai];  
@@ -269,7 +277,7 @@ namespace nutty
             typename T,
             typename ST
         >
-        void Compact(T* dst, T* src, ST* mask, ST* scanned, ST neutralElement, size_t d)
+        __host__ void Compact(T* dst, T* src, ST* mask, ST* scanned, ST neutralElement, size_t d)
         {
             dim3 grid = cuda::GetCudaGrid(d, (size_t)256);
             compact<<<grid.x, 256, 0, 0>>>(dst, src, mask, scanned, neutralElement, d);
@@ -281,7 +289,7 @@ namespace nutty
             typename T,
             typename I
         >
-        void ExclusivePrefixSumScan(T* begin, I* prefixSum, I* sums, size_t d)
+        __host__ void ExclusivePrefixSumScan(T* begin, I* prefixSum, I* sums, size_t d)
         {
            PrefixSumOp<T> op;
            _ExclusiveScan(begin, prefixSum, sums, d, op);
@@ -293,7 +301,7 @@ namespace nutty
             typename Operation,
             int TYPE
         >
-        void __Scan(T* begin, I* scanned, I* sums, I* scannedSums, size_t d, Operation op)
+       __host__  void __Scan(T* begin, I* scanned, I* sums, I* scannedSums, size_t d, Operation op)
         {
             size_t elementsPerBlock = ELEMS_PER_BLOCK;
 
@@ -339,7 +347,7 @@ namespace nutty
             typename Operator,
             int TYPE
         >
-        void _Scan(T* begin, I* prefixSum, I* sums, size_t d, Operator op)
+        __host__ void _Scan(T* begin, I* prefixSum, I* sums, size_t d, Operator op)
         {            
             dim3 grid = cuda::GetCudaGrid(d, ELEMS_PER_BLOCK);
 
@@ -349,15 +357,20 @@ namespace nutty
                 return;
             }
 
-            nutty::DeviceBuffer<I> scannedSums(grid.x, op.GetNeutral());
+            I* scannedSums;
+            cudaMalloc(&scannedSums, grid.x * sizeof(I));
 
-            __Scan<T, I, Operator, TYPE>(begin, prefixSum, sums, scannedSums.Begin()(), d, op);
+            //nutty::DeviceBuffer<I> scannedSums(grid.x, op.GetNeutral());
+
+            __Scan<T, I, Operator, TYPE>(begin, prefixSum, sums, scannedSums, d, op);
 
             grid.x = grid.x - 1;
 
             assert(grid.x > 0);
 
-            spreadSums<<<grid, ELEMS_PER_BLOCK, 0, 0>>>(prefixSum, scannedSums.Begin()(), d);
+            spreadSums<<<grid, ELEMS_PER_BLOCK, 0, 0>>>(prefixSum, scannedSums, d);
+
+            cudaFree(scannedSums);
         }
 
         template <
@@ -365,7 +378,7 @@ namespace nutty
             typename I,
             typename Operator
         >
-        void _ExclusiveScan(T* begin, I* prefixSum, I* sums, size_t d, Operator op)
+        __host__ void _ExclusiveScan(T* begin, I* prefixSum, I* sums, size_t d, Operator op)
         {            
             _Scan<T, I, Operator, 0>(begin, prefixSum, sums, d, op);
         }
@@ -375,7 +388,7 @@ namespace nutty
             typename I,
             typename Operator
         >
-        void _InclusiveScan(T* begin, I* prefixSum, I* sums, size_t d, Operator op)
+        __host__ void _InclusiveScan(T* begin, I* prefixSum, I* sums, size_t d, Operator op)
         {            
             _Scan<T, I, Operator, 1>(begin, prefixSum, sums, d, op);
         }

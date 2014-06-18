@@ -1,5 +1,6 @@
 #pragma once
 #include "base/scan.h"
+#include "Copy.h"
 
 namespace nutty
 {
@@ -43,5 +44,20 @@ namespace nutty
     void Compact(Iterator_& dstBegin, Iterator_& begin, Iterator_& end, ScanIterator& mask, ScanIterator& dstAddress, T neutral)
     {
         nutty::cuda::Compact(dstBegin(), begin(), mask(), dstAddress(), neutral, Distance(begin, end));
+    }
+
+    template <
+        typename Iterator_,
+        typename MaskIterator_
+    >
+    void MakeExclusive(Iterator_& dstBegin, Iterator_& srcBegin, Iterator_& srcEnd, MaskIterator_& mask)
+    {
+        static const uint zzerro = 0;
+        nutty::Copy(dstBegin, zzerro);
+        nutty::Copy(dstBegin + 1, srcBegin, srcEnd - 1);
+        uint endVal = 0;
+        size_t end = nutty::Distance(srcBegin, srcEnd) - 1;
+        endVal = *(srcEnd - 1) - *(mask + end);
+        nutty::Copy(dstBegin + end, endVal);
     }
 }

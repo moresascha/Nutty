@@ -12,7 +12,7 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
+        __host__ void Copy(
         Iterator<
         T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
         >& dst, 
@@ -27,7 +27,7 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
+        __host__ void Copy(
         Iterator<
         T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
         >& dst, 
@@ -42,7 +42,7 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
+        __host__ void Copy(
         Iterator<
         T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
         >& dst, 
@@ -57,7 +57,7 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
+        __host__ void Copy(
         Iterator<
         T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
         >& dst, 
@@ -72,7 +72,7 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
+        __host__ void Copy(
         Iterator<
         T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
         >& dst, 
@@ -87,7 +87,7 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
+        __host__ void Copy(
         Iterator<
         T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
         >& dst, 
@@ -102,7 +102,7 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
+        __host__ void Copy(
         Iterator<
         T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
         >& dst, 
@@ -115,7 +115,7 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
+        __host__ void Copy(
         Iterator<
         T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
         >& dst, 
@@ -130,7 +130,7 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
+        __host__ void Copy(
         Iterator<
         T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
         >& dst, 
@@ -145,7 +145,7 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
+        __host__ void Copy(
         Iterator<
         T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
         >& dst, 
@@ -158,7 +158,7 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
+        __host__ void Copy(
         Iterator<
         T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
         >& dst, 
@@ -171,7 +171,7 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
+        __host__ void Copy(
         Iterator<
         T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
         >& dst, 
@@ -184,7 +184,7 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
+        __host__ void Copy(
         DevicePtr<T>& dst,
         const Iterator<
         const T, const nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>
@@ -197,7 +197,7 @@ namespace nutty
         template <
             typename T
         >
-        void Copy(
+        __host__ void Copy(
         DevicePtr<T>& dst,
         const Iterator<
         T, nutty::base::Base_Buffer<T, nutty::HostContent<T>, nutty::DefaultAllocator<T>>

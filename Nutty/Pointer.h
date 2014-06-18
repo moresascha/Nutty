@@ -43,39 +43,33 @@ namespace nutty
         }
 
         template <
-            typename T,
-            typename Content
+            typename T
         >
         __device__ __host__ friend Pointer<T> operator+(const Pointer<T>& i0, const Pointer<T>& i1);
 
         template <
-            typename T,
-            typename Content
+            typename T
         >
         __device__ __host__ friend Pointer<T> operator-(const Pointer<T>& i0, const Pointer<T>& i1);
 
         template <
-            typename T,
-            typename Content
+            typename T
         >
         __device__ __host__ friend Pointer<T> operator+(const Pointer<T>& i0, size_type i);
 
-        template <
-            typename T,
-            typename Content
-        >
-        __device__ __host__ friend Pointer<T> operator+(const Pointer<T>& i0, unsigned long long i);
+//         template <
+//             typename T
+//         >
+//         __device__ __host__ friend Pointer<T> operator+(const Pointer<T>& i0, unsigned long long i);
 
         template <
-            typename T,
-            typename Content
+            typename T
         >
         __device__ __host__ friend Pointer<T> operator-(const Pointer<T>& i0, size_type i);
     };
 
     template <
-        typename T,
-        typename Content
+        typename T
     >
     __device__ __host__ Pointer<T> operator+(const Pointer<T>& i0, const Pointer<T>& i1)
     {
@@ -85,8 +79,7 @@ namespace nutty
     }
 
     template <
-        typename T,
-        typename Content
+        typename T
     >
     __device__ __host__ Pointer<T> operator-(const Pointer<T>& i0, Pointer<T>& i1)
     {
@@ -96,8 +89,7 @@ namespace nutty
     }
 
     template <
-        typename T,
-        typename Content
+        typename T
     >
     __device__ __host__ Pointer<T> operator+(const Pointer<T>& i0, typename Pointer<T>::size_type i)
     {
@@ -107,8 +99,7 @@ namespace nutty
     }
 
     template <
-        typename T,
-        typename Content
+        typename T
     >
     __device__ __host__ Pointer<T> operator-(const Pointer<T>& i0, typename Pointer<T>::size_type i)
     {
@@ -117,40 +108,18 @@ namespace nutty
         return it;
     }
 
-    template <
-        typename T,
-        typename Content
-    >
-    __device__ __host__ Pointer<T> operator+(Pointer<T>& i0, unsigned long long i)
-    {
-        return operator+(i0, (size_t)i);
-    }
+//     template <
+//         typename T
+//     >
+//     __device__ __host__ Pointer<T> operator+(Pointer<T>& i0, unsigned long long i)
+//     {
+//         return operator+(i0, (size_t)i);
+//     }
 
     template <
-        typename T,
-        typename Content
+        typename T
     >
     __device__ __host__ size_t Distance(const Pointer<T>& begin, const Pointer<T>& end)
-    {
-        return (end() - begin());
-    }
-
-    template <
-        typename T,
-        typename Content,
-        typename Iterator
-    >
-    __device__ __host__ size_t Distance(const Iterator& begin, const Pointer<T>& end)
-    {
-        return (end() - begin());
-    }
-
-    template <
-        typename T,
-        typename Content,
-        typename Iterator
-    >
-    __device__ __host__ size_t Distance(const Pointer<T>& begin, const Iterator& end)
     {
         return (end() - begin());
     }

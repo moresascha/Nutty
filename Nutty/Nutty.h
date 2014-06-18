@@ -4,11 +4,15 @@
 #ifdef _DEBUG
     #pragma comment(lib, "cuda.lib")
     #pragma comment(lib, "cudart_static.lib")
+    //#pragma comment(lib, "cudart.lib")
+    #pragma comment(lib, "cudadevrt.lib")
     //#pragma comment(lib, "Nuttyx64Debug.lib")
     //#pragma comment(lib, "cudart.lib")
 #else
     #pragma comment(lib, "cuda.lib")
     #pragma comment(lib, "cudart_static.lib")
+    #pragma comment(lib, "cudart.lib")
+    #pragma comment(lib, "cudadevrt.lib")
     //#pragma comment(lib, "Nuttyx64Release.lib")
     //#pragma comment(lib, "cudart.lib")
 #endif

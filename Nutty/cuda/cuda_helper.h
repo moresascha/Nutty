@@ -93,5 +93,13 @@ namespace nutty
             }
             return (dataCnt / groupSize + 1);
         }
+
+        template <
+            typename T
+        >
+        __host__ __device__ __forceinline T GetCudaBlock(T dataCnt, T groupSize)
+        {
+            return  dataCnt < groupSize ? dataCnt : groupSize;;
+        }
     }
 }

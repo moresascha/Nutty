@@ -91,6 +91,11 @@ namespace nutty
 
         }
 
+        T operator[](size_type index) const
+        {
+            return *(m_ptr + index);
+        }
+
         T& operator[](size_type index)
         {
             return *(m_ptr + index);

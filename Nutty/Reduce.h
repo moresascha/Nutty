@@ -23,7 +23,7 @@ namespace nutty
         typename BinaryOperation,
         typename T
     >
-    __host__ __device__ void Reduce(IteratorDst& dst, IteratorSrc& srcBegin, IteratorSrc& srcEnd, BinaryOperation op, T neutral)
+    __host__ void Reduce(IteratorDst& dst, IteratorSrc& srcBegin, IteratorSrc& srcEnd, BinaryOperation op, T neutral)
     {
         nutty::base::Reduce(dst, srcBegin, Distance(srcBegin, srcEnd), op, neutral);
     }
@@ -34,8 +34,19 @@ namespace nutty
         typename BinaryOperation,
         typename T
     >
-    __host__ __device__ void Reduce(IteratorDst& start, IteratorSrc& end, BinaryOperation op, T neutral)
+    __host__ void Reduce(IteratorDst& start, IteratorSrc& end, BinaryOperation op, T neutral)
     {
         nutty::base::Reduce(start, start, Distance(start, end), op, neutral);
+    }
+
+    template <
+        typename IteratorDst,
+        typename IteratorSrc,
+        typename BinaryOperation,
+        typename T
+    >
+    __device__ void ReduceDP(IteratorDst& start, IteratorSrc& end, BinaryOperation op, T neutral)
+    {
+        nutty::base::ReduceDP(start, start, Distance(start, end), op, neutral);
     }
 }

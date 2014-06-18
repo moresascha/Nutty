@@ -69,29 +69,51 @@ namespace nutty
             //assert(d > 1);
 
             //todo: reduce small sets on the cpu
+            uint elementsLeft = 2;
 
-            nutty::cuda::ReduceDP(dst(), src(), neutral, d, op, elementsPerBlock);
-
-            if(d < elementsPerBlock)
+            while(elementsLeft > 1)
             {
-                return;
+                nutty::cuda::ReduceDP(dst(), src(), neutral, d, op, elementsPerBlock);
+
+                if(d < elementsPerBlock)
+                {
+                    return;
+                }
+
+                uint rest = (d % elementsPerBlock);
+
+                uint grid = (uint)d / elementsPerBlock;
+
+                if(rest > 0)
+                {
+                    nutty::cuda::ReduceDP(dst() + grid, src(), neutral, rest, op, rest, elementsPerBlock * grid);
+                }
+                src = dst;
+                elementsLeft = (uint)d / elementsPerBlock + (rest ? 1 : 0);
             }
 
-            uint rest = (d % elementsPerBlock);
+//             nutty::cuda::ReduceDP(dst(), src(), neutral, d, op, elementsPerBlock);
+// 
+//             if(d < elementsPerBlock)
+//             {
+//                 return;
+//             }
+//  
+//             uint rest = (d % elementsPerBlock);
+// 
+//             uint grid = (uint)d / elementsPerBlock;
+// 
+//             if(rest > 0)
+//             {
+//                 nutty::cuda::ReduceDP(dst() + grid, src(), neutral, rest, op, rest, elementsPerBlock * grid);
+//             }
+  
+//             uint elementsLeft = (uint)d / elementsPerBlock + (rest ? 1 : 0);
 
-            uint grid = (uint)d / elementsPerBlock;
-
-            if(rest > 0)
-            {
-                nutty::cuda::ReduceDP(dst() + grid, src(), neutral, rest, op, rest, elementsPerBlock * grid);
-            }
-
-            UINT elementsLeft = (uint)d / elementsPerBlock + (rest ? 1 : 0);
-
-            if(elementsLeft > 1)
-            {
-                base::ReduceDP(dst, dst, elementsLeft, op, neutral);
-            }
+//             if(elementsLeft > 1)
+//             {
+//                 base::ReduceDP(dst, dst, elementsLeft, op, neutral);
+//             }
         }
 
         template <

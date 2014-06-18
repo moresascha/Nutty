@@ -12,16 +12,16 @@ namespace nutty
         typedef size_t size_type;
 
     public:
-        pointer Allocate(size_type n)
+        __host__ pointer Allocate(size_type n)
         {
             pointer ptr;
             CUDA_RT_SAFE_CALLING_NO_SYNC(cudaMalloc((void**)&ptr, n * sizeof(T)));
             return ptr;
         }
 
-        void Deallocate(pointer ptr)
+        __host__ void Deallocate(pointer ptr)
         {
-            CHECK_CNTX();
+            //CHECK_CNTX();
             CUDA_RT_SAFE_CALLING_NO_SYNC(cudaFree((void*)ptr));
         }
     };
@@ -35,12 +35,12 @@ namespace nutty
         typedef size_t size_type;
 
     public:
-        pointer Allocate(size_type n)
+        __host__ pointer Allocate(size_type n)
         {
             return NULL;
         }
 
-        void Deallocate(pointer ptr)
+        __host__ void Deallocate(pointer ptr)
         {
 
         }
@@ -57,14 +57,14 @@ namespace nutty
         typedef size_t size_type;
 
     public:
-        pointer Allocate(size_type n)
+        __host__  pointer Allocate(size_type n)
         {
             pointer p;
             cudaMallocHost(&p, n * sizeof(T));
             return p;
         }
 
-        void Deallocate(pointer ptr)
+        __host__  void Deallocate(pointer ptr)
         {
             cudaFreeHost(ptr);
             //free(ptr);

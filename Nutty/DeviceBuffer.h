@@ -19,7 +19,7 @@ namespace nutty
         template<
             typename C
         >
-        void Insert(Iterator<T, C>& pos, const_type_reference v)
+        __host__ void Insert(Iterator<T, C>& pos, const_type_reference v)
         {
             Copy(pos, v);
         }
@@ -27,7 +27,7 @@ namespace nutty
         template<
             typename C
         >
-        void Insert(Iterator<T, C>& pos, size_type d, const_type_reference v)
+        __host__ void Insert(Iterator<T, C>& pos, size_type d, const_type_reference v)
         {
             Copy(pos, v, d);
         }
@@ -35,7 +35,7 @@ namespace nutty
         template<
             typename C
         >
-        void Insert(Iterator<T, C>& start, Iterator<T, C>& end, const_type_reference v)
+        __host__ void Insert(Iterator<T, C>& start, Iterator<T, C>& end, const_type_reference v)
         {
             size_t d = Distance(start, end);
             Copy(start, end, v, d);
@@ -44,7 +44,7 @@ namespace nutty
         template<
             typename C
         >
-        T operator[](Iterator<const T, const C>& it) const
+        __host__ T operator[](Iterator<const T, const C>& it) const
         {
             HostBuffer<T> host(1);
             Copy(host.Begin(), it, it+1);
@@ -54,7 +54,7 @@ namespace nutty
         template<
             typename C
         >
-        T operator[](const Iterator<T, C>& it) const
+        __host__ T operator[](const Iterator<T, C>& it) const
         {
             HostBuffer<T> host(1);
             Copy(host.Begin(), it, it+1);
@@ -64,7 +64,7 @@ namespace nutty
         template<
             typename C
         >
-        T operator[](const Iterator<const T, const C>& it) const
+        __host__ T operator[](const Iterator<const T, const C>& it) const
         {
             HostBuffer<T> host(1);
             Copy(host.Begin(), it, it+1);
@@ -84,42 +84,42 @@ namespace nutty
 
         typedef nutty::base::Base_Buffer<T, DeviceContent<T>, Allocator> base_class;
 
-        DeviceBuffer(size_type n) 
+        __host__ DeviceBuffer(size_type n) 
             : base_class(n)
         {
 
         }
 
-        DeviceBuffer(void) 
+        __host__ DeviceBuffer(void) 
             : base_class()
         {
 
         }
 
-        DeviceBuffer(pointer p, size_type n) 
+        __host__ DeviceBuffer(pointer p, size_type n) 
             : base_class(n)
         {
             m_ptr = p;
         }
 
-        DeviceBuffer(DeviceBuffer&& c) 
+        __host__ DeviceBuffer(DeviceBuffer&& c) 
             : base_class(std::move(c))
         {
 
         }
 
-        DeviceBuffer(size_type n, const_type_reference t) 
+        __host__ DeviceBuffer(size_type n, const_type_reference t) 
             : base_class(n, t)
         {
 
         }
 
-        DeviceBuffer& operator=(DeviceBuffer&& c)
+        __host__ DeviceBuffer& operator=(DeviceBuffer&& c)
         {
             return base_class::operator=(std::move(c));
         }
 
-        DevicePtr<T> GetDevicePtr(void)
+        __host__ DevicePtr<T> GetDevicePtr(void)
         {
             return DevicePtr<T>(m_ptr);
         }

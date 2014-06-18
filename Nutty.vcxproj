@@ -151,6 +151,7 @@
     <ClInclude Include="Nutty\cuda\copy.h" />
     <ClInclude Include="Nutty\cuda\cuda_helper.h" />
     <ClInclude Include="Nutty\cuda\Event.h" />
+    <ClInclude Include="Nutty\cuda\foreach.h" />
     <ClInclude Include="Nutty\cuda\reduce.h" />
     <ClInclude Include="Nutty\cuda\scan.h" />
     <ClInclude Include="Nutty\cuTimer.h" />

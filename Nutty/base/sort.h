@@ -1,6 +1,8 @@
 #pragma once
 #include "../cuda/sort.h"
 
+#define ___host __host__
+
 namespace nutty
 {
     template <
@@ -8,7 +10,7 @@ namespace nutty
     >
     struct BinaryDescending
     {
-        __device__ __host__ char operator()(T f0, T f1)
+        __device__ ___host char operator()(T f0, T f1)
         {
             return f0 > f1;
         }
@@ -19,7 +21,7 @@ namespace nutty
     >
     struct BinaryAscending
     {
-        __device__ __host__ char operator()(T f0, T f1)
+        __device__ ___host char operator()(T f0, T f1)
         {
             return f0 < f1;
         }
@@ -31,7 +33,7 @@ namespace nutty
             typename Iterator_,
             typename BinaryOperation
         >
-        __host__ __device__ void SortPerGroup(
+        ___host void SortPerGroup(
             Iterator_& begin, 
             uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
         {
@@ -42,7 +44,7 @@ namespace nutty
             typename Iterator_,
             typename BinaryOperation
         >
-        __host__ __device__ void SortStep(Iterator_& start, uint grid, uint block, uint stage, uint step, uint length, BinaryOperation op)
+        ___host void SortStep(Iterator_& start, uint grid, uint block, uint stage, uint step, uint length, BinaryOperation op)
         {
             nutty::cuda::SortStep(start, grid, block, stage, step, length, op);
         }
@@ -51,7 +53,7 @@ namespace nutty
             typename Iterator_,
             typename BinaryOperation
         >
-        __host__ __device__ void Sort(Iterator_& start, Iterator_& end, BinaryOperation op)
+        ___host void Sort(Iterator_& start, Iterator_& end, BinaryOperation op)
         {
             size_t d = Distance(start, end);
             base::Sort(start, d, op);
@@ -61,7 +63,7 @@ namespace nutty
             typename Iterator_,
             typename BinaryOperation
         >
-        __host__ __device__ void Sort(Iterator_& start, size_t d, BinaryOperation op)
+        ___host void Sort(Iterator_& start, size_t d, BinaryOperation op)
         {
             uint length = (uint)d;
 

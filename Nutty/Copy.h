@@ -7,7 +7,7 @@ namespace nutty
         typename IteratorOut,
         typename T
     >
-    void Copy(IteratorOut& begin, const T& t, size_t d)
+    __host__ void Copy(IteratorOut& begin, const T& t, size_t d)
     {
         nutty::base::Copy(begin, t, d);
     }
@@ -16,7 +16,7 @@ namespace nutty
         typename IteratorOut,
         typename T
     >
-    void Copy(IteratorOut& begin, const T& t)
+    __host__ void Copy(IteratorOut& begin, const T& t)
     {
         nutty::base::Copy(begin, t, 1);
     }
@@ -25,7 +25,7 @@ namespace nutty
         typename IteratorIn,
         typename IteratorOut
     >
-    void Copy(IteratorOut& dst, const IteratorIn& srcBegin, const IteratorIn& srcEnd)
+    __host__ void Copy(IteratorOut& dst, const IteratorIn& srcBegin, const IteratorIn& srcEnd)
     {
         nutty::base::Copy(dst, srcBegin, Distance(srcBegin, srcEnd));
     }

@@ -15,9 +15,9 @@ namespace nutty
         {
             friend class Iterator<T, Base_Buffer<T, Content, Allocator>>;
         private:
-            Base_Buffer(const Base_Buffer& b) {}
+            __host__ Base_Buffer(const Base_Buffer& b) {}
 
-            void _delete(void)
+            __host__ void _delete(void)
             {
                 if(m_ptr)
                 {
@@ -28,7 +28,7 @@ namespace nutty
             }
 
         public:
-            Base_Buffer(Base_Buffer&& c) : m_ptr(NULL), m_size(0)
+            __host__ Base_Buffer(Base_Buffer&& c) : m_ptr(NULL), m_size(0)
             {
                 m_ptr = c.m_ptr;
                 m_size = c.m_size;
@@ -37,7 +37,7 @@ namespace nutty
                 c.m_size = 0;
             }
 
-            Base_Buffer& operator=(Base_Buffer&& c)
+            __host__ Base_Buffer& operator=(Base_Buffer&& c)
             {
                 if(this != &c)
                 {
@@ -62,14 +62,14 @@ namespace nutty
             typedef size_t size_type;
             typedef const size_type& const_size_typ_reference;
 
-            Base_Buffer(void)
+            __host__ Base_Buffer(void)
             {
                 m_size = 0;
                 m_ptr = 0;
                 m_pushBackIndex = 0;
             }
 
-            Base_Buffer(size_type n)
+            __host__ Base_Buffer(size_type n)
             {
                 m_size = 0;
                 m_ptr = 0;
@@ -77,7 +77,7 @@ namespace nutty
                 Resize(n);
             }
 
-            Base_Buffer(size_type n, const_type_reference t)
+            __host__ Base_Buffer(size_type n, const_type_reference t)
             {
                 m_size = 0;
                 m_ptr = 0;
@@ -86,33 +86,38 @@ namespace nutty
                 Fill(Begin(), End(), t);
             }
 
-            iterator Begin(void)
+            __host__ iterator Begin(void)
             {
                 //assert(m_size > 0);
                 return iterator(m_ptr, this);
             }
 
-            iterator End(void)
+            __host__ iterator End(void)
             {
                 return iterator(m_ptr + m_size, this);
             }
 
-            const_iterator Begin(void) const
+            __host__ const_iterator Begin(void) const
             {
                 return const_iterator(m_ptr, this);
             }
 
-            const_iterator End(void) const
+            __host__ const_iterator End(void) const
             {
                 return const_iterator(m_ptr + m_size, this);
             }
 
-            bool Empty(void)
+            __host__ bool Empty(void)
             {
                 return m_size == 0;
             }
 
-            void Resize(size_type n)
+            __host__ void Grow(size_type dn)
+            {
+                Resize(Size() + dn);
+            }
+
+            __host__ void Resize(size_type n)
             {
                 if(n <= m_size)
                 {
@@ -132,22 +137,22 @@ namespace nutty
                 m_size = n;
             }
 
-            const_size_typ_reference Size(void) const
+            __host__ const_size_typ_reference Size(void) const
             {
                 return m_size;
             }
 
-            void Insert(iterator pos, const_type_reference v)
+            __host__ void Insert(iterator pos, const_type_reference v)
             {
                 m_content.Insert(pos, v);
             }
 
-            void Insert(iterator start, iterator end, const_type_reference v)
+            __host__ void Insert(iterator start, iterator end, const_type_reference v)
             {
                 m_content.Insert(start, end, v);
             }
 
-            void Insert(size_type pos, const_type_reference v)
+            __host__ void Insert(size_type pos, const_type_reference v)
             {
                 Insert(Begin() + pos, v);
             }
@@ -157,24 +162,24 @@ namespace nutty
 //                 m_content.Insert(Begin() + pos, v);
 //             }
 
-            T operator[](const_iterator it) const
+            __host__ T operator[](const_iterator it) const
             {
                 return m_content[it];
             }
 
-            T operator[](size_type index) const
+            __host__ T operator[](size_type index) const
             {
                 assert(index < m_size);
                 const_iterator it = Begin() + index;
                 return operator[](it);
             }
 
-            pointer* GetRawPointer(void)
+            __host__ pointer* GetRawPointer(void)
             {
                 return &m_ptr;
             }
 
-            void PushBack(const_type_reference v)
+            __host__ void PushBack(const_type_reference v)
             {
                 if(m_pushBackIndex >= m_size)
                 {
@@ -187,7 +192,7 @@ namespace nutty
                 class A,
                 template <class A> class Ptr
             >
-            void PushBack(const Ptr<A>& src, size_t d)
+            __host__ void PushBack(const Ptr<A>& src, size_t d)
             {
                 if(GetPos() + d >= Size())
                 {
@@ -197,22 +202,22 @@ namespace nutty
                 m_pushBackIndex += d;
             }
 
-            size_t GetPos(void)
+            __host__ size_t GetPos(void)
             {
                 return m_pushBackIndex;
             }
 
-            void Reset(void)
+            __host__ void Reset(void)
             {
                 m_pushBackIndex = 0;
             }
 
-            size_t ByteCount(void) const
+            __host__ size_t Bytes(void) const
             {
                 return Size() * sizeof(T);
             }
 
-            virtual ~Base_Buffer(void)
+            __host__ virtual ~Base_Buffer(void)
             {
                 _delete();
             }
