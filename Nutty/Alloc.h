@@ -60,7 +60,7 @@ namespace nutty
         __host__  pointer Allocate(size_type n)
         {
             pointer p;
-            cudaMallocHost(&p, n * sizeof(T));
+            cudaMallocHost((void**)&p, n * sizeof(T));
             return p;
         }
 

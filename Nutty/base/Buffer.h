@@ -53,14 +53,14 @@ namespace nutty
                 return *this;
             }
 
-            typedef T* pointer;
-            typedef const T& const_type_reference;
-            typedef const pointer const_pointer;
-            typedef T& type_reference;
-            typedef Iterator<T, Base_Buffer<T, Content, Allocator>> iterator;
-            typedef Iterator<const T, const Base_Buffer<T, Content, Allocator>> const_iterator;
-            typedef size_t size_type;
-            typedef const size_type& const_size_typ_reference;
+            typedef typename T* pointer;
+            typedef typename const T& const_type_reference;
+            typedef typename const pointer const_pointer;
+            typedef typename T& type_reference;
+            typedef typename Iterator<T, Base_Buffer<T, Content, Allocator>> iterator;
+            typedef typename Iterator<const T, const Base_Buffer<T, Content, Allocator>> const_iterator;
+            typedef typename size_t size_type;
+            typedef typename const size_type& const_size_typ_reference;
 
             __host__ Base_Buffer(void)
             {
@@ -162,19 +162,21 @@ namespace nutty
 //                 m_content.Insert(Begin() + pos, v);
 //             }
 
-            __host__ T operator[](const_iterator it) const
-            {
-                return m_content[it];
-            }
+//             __host__ T operator[](const_iterator it) const
+//             {
+//                 return m_content[it];
+//             }
 
             __host__ T operator[](size_type index) const
             {
+#ifdef __DEBUG
                 assert(index < m_size);
-                const_iterator it = Begin() + index;
-                return operator[](it);
+#endif
+                //const_iterator it = Begin() + index;
+                return m_content.Get(index, m_ptr);
             }
 
-            __host__ pointer* GetRawPointer(void)
+            __host__ const pointer* GetRawPointer(void) const
             {
                 return &m_ptr;
             }
@@ -192,13 +194,14 @@ namespace nutty
                 class A,
                 template <class A> class Ptr
             >
-            __host__ void PushBack(const Ptr<A>& src, size_t d)
+            __host__ void PushBack(const Ptr<A>& src, size_t d, cudaStream_t stream = 0)
             {
                 if(GetPos() + d >= Size())
                 {
                     Resize(Size() + d);
                 }
                 Copy(Begin() + GetPos(), src, d);
+                //cudaMemcpyAsync(Begin()() + GetPos(), src(), d, cudaMemcpyHostToDevice, stream);
                 m_pushBackIndex += d;
             }
 

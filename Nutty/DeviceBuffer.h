@@ -14,8 +14,22 @@ namespace nutty
         typedef T& type_reference;
         typedef const T& const_type_reference;
         typedef size_t size_type;
+        T* m_pPinnedHostMemory;
 
     public:
+        DeviceContent(void) : m_pPinnedHostMemory(NULL)
+        {
+
+        }
+
+        ~DeviceContent(void)
+        {
+            if(m_pPinnedHostMemory)
+            {
+                cudaFreeHost(m_pPinnedHostMemory);
+            }
+        }
+
         template<
             typename C
         >
@@ -46,9 +60,14 @@ namespace nutty
         >
         __host__ T operator[](Iterator<const T, const C>& it) const
         {
-            HostBuffer<T> host(1);
-            Copy(host.Begin(), it, it+1);
-            return host[0];
+            //HostBuffer<T> host(1);
+            //Copy(host.Begin(), it, it+1);
+            if(m_pPinnedHostMemory == NULL)
+            {
+                cudaMallocHost((void**)&m_pPinnedHostMemory, sizeof(T));
+            }
+            cudaMemcpy(m_pPinnedHostMemory, it(), sizeof(T), cudaMemcpyDeviceToHost);
+            return *m_pPinnedHostMemory; //host[0];
         }
 
         template<
@@ -56,9 +75,12 @@ namespace nutty
         >
         __host__ T operator[](const Iterator<T, C>& it) const
         {
-            HostBuffer<T> host(1);
-            Copy(host.Begin(), it, it+1);
-            return host[0];
+            if(m_pPinnedHostMemory == NULL)
+            {
+                cudaMallocHost((void**)&m_pPinnedHostMemory, sizeof(T));
+            }
+            cudaMemcpy(m_pPinnedHostMemory, it(), sizeof(T), cudaMemcpyDeviceToHost);
+            return *m_pPinnedHostMemory; //host[0];
         }
 
         template<
@@ -66,9 +88,29 @@ namespace nutty
         >
         __host__ T operator[](const Iterator<const T, const C>& it) const
         {
-            HostBuffer<T> host(1);
-            Copy(host.Begin(), it, it+1);
-            return host[0];
+            //HostBuffer<T> host(1);
+            //Copy(host.Begin(), it, it+1);
+            if(m_pPinnedHostMemory == NULL)
+            {
+                cudaMallocHost((void**)&m_pPinnedHostMemory, sizeof(T));
+            }
+            cudaMemcpy(m_pPinnedHostMemory, it(), sizeof(T), cudaMemcpyDeviceToHost);
+            return *m_pPinnedHostMemory; //host[0];
+        }
+
+        template<
+            typename T
+        >
+        __host__ T Get(size_t index, const T* ptr) const
+        {
+            //HostBuffer<T> host(1);
+            //Copy(host.Begin(), it, it+1);
+            if(m_pPinnedHostMemory == NULL)
+            {
+                cudaMallocHost((void**)&m_pPinnedHostMemory, sizeof(T));
+            }
+            cudaMemcpy(m_pPinnedHostMemory, ptr + index, sizeof(T), cudaMemcpyDeviceToHost);
+            return *m_pPinnedHostMemory; //host[0];
         }
     };
 
@@ -82,7 +124,7 @@ namespace nutty
 
     public:
 
-        typedef nutty::base::Base_Buffer<T, DeviceContent<T>, Allocator> base_class;
+        typedef typename nutty::base::Base_Buffer<T, DeviceContent<T>, Allocator> base_class;
 
         __host__ DeviceBuffer(size_type n) 
             : base_class(n)
@@ -122,6 +164,16 @@ namespace nutty
         __host__ DevicePtr<T> GetDevicePtr(void)
         {
             return DevicePtr<T>(m_ptr);
+        }
+
+        __host__ T* GetPointer(void)
+        {
+            return m_ptr;
+        }
+
+        __host__ const T* __restrict GetConstPointer(void) const
+        {
+            return m_ptr;
         }
     };
 }

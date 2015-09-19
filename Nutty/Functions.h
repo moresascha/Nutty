@@ -73,7 +73,7 @@ namespace nutty
         >
         struct Plus
         {
-            __device__ __host__ T operator()(T t0, T t1)
+            __forceinline__ __device__ __host__ T operator()(T t0, T t1)
             {
                 return t0 + t1;
             }
@@ -84,7 +84,7 @@ namespace nutty
         >
         struct Minus
         {
-            __device__ __host__ T operator()(T t0, T t1)
+            __forceinline__ __device__ __host__ T operator()(T t0, T t1)
             {
                 return t0 - t1;
             }
@@ -95,7 +95,7 @@ namespace nutty
         >
         struct Max
         {
-            __device__ __host__ T operator()(T t0, T t1)
+            __forceinline__ __device__ __host__ T operator()(T t0, T t1)
             {
                 return t0 < t1 ? t1 : t0;
             }
@@ -106,7 +106,7 @@ namespace nutty
         >
         struct Min
         {
-            __device__ __host__ T operator()(T t0, T t1)
+            __forceinline__ __device__ __host__ T operator()(T t0, T t1)
             {
                 return t0 < t1 ? t0 : t1;
             }
@@ -117,7 +117,7 @@ namespace nutty
         >
         struct Mul
         {
-            __device__ __host__ T operator()(T t0, T t1)
+            __forceinline__ __device__ __host__ T operator()(T t0, T t1)
             {
                 return t0 * t1;
             }
@@ -128,7 +128,7 @@ namespace nutty
         >
         struct Div
         {
-            __device__ __host__ T operator()(T t0, T t1)
+            __forceinline__ __device__ __host__ T operator()(T t0, T t1)
             {
                 return t0 / t1;
             }

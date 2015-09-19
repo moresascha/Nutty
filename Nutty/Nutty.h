@@ -66,6 +66,8 @@ namespace nutty
 
     void SetStream(const cuStream& stream);
 
+    void PrintDeviceInfos(void);
+
     void SetDefaultStream(void);
 }
 

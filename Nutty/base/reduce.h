@@ -8,26 +8,28 @@ namespace nutty
 {
     namespace base
     {
+
         template <
             typename IteratorDst,
             typename IteratorSrc,
             typename BinaryOperation,
             typename T
         >
-        __host__ void Reduce(
+        __host__ void Reduce1(
         IteratorDst& dst, 
         IteratorSrc& src,
         size_t d,
         BinaryOperation op,
-        T neutral)
+        T neutral,
+        cudaStream_t pStream = NULL)
         {
-            uint elementsPerBlock = 512;
-            
+            uint elementsPerBlock = 256;
+
             //assert(d > 1);
 
             //todo: reduce small sets on the cpu
 
-            nutty::cuda::Reduce(dst(), src(), neutral, d, op, elementsPerBlock);
+            nutty::cuda::Reduce(dst(), src(), neutral, d, op, elementsPerBlock, 0, pStream);
 
             if(d < elementsPerBlock)
             {
@@ -40,14 +42,44 @@ namespace nutty
 
             if(rest > 0)
             {
-                nutty::cuda::Reduce(dst() + grid, src(), neutral, rest, op, rest, elementsPerBlock * grid);
+                nutty::cuda::Reduce(dst() + grid, src(), neutral, rest, op, rest, elementsPerBlock * grid, pStream);
             }
 
             UINT elementsLeft = (uint)d / elementsPerBlock + (rest ? 1 : 0);
 
             if(elementsLeft > 1)
             {
-                base::Reduce(dst, dst, elementsLeft, op, neutral);
+                base::Reduce1(dst, dst, elementsLeft, op, neutral, pStream);
+            }
+        }
+
+        template <
+            typename IteratorDst,
+            typename IteratorSrc,
+            typename BinaryOperation,
+            typename T
+        >
+        __host__ void Reduce(
+        IteratorDst& dst, 
+        IteratorSrc& src,
+        size_t d,
+        BinaryOperation op,
+        T neutral,
+        cudaStream_t pStream = NULL)
+        {
+            const uint elementsPerBlock = 2*4096;//d / blockCount; //4 * 512;
+            const uint blockSize = 256;//elementsPerBlock / 2;
+
+            //assert(d > 1);
+            uint grid = nutty::cuda::GetCudaGrid((uint)d, elementsPerBlock);
+            if(grid > 1)//d > elementsPerBlock)
+            {
+                nutty::cuda::blockReduce<blockSize><<<grid, blockSize, 0, pStream>>>(src(), dst(), op, neutral, elementsPerBlock, (uint)d);
+                nutty::cuda::blockReduce<blockSize><<<1, blockSize, 0, pStream>>>(dst(), dst(), op, neutral, grid, grid);
+            }
+            else
+            {
+                nutty::cuda::blockReduce<blockSize><<<1, blockSize, 0, pStream>>>(src(), dst(), op, neutral, d, (uint)d);
             }
         }
 
@@ -62,58 +94,61 @@ namespace nutty
         IteratorSrc& src,
         size_t d,
         BinaryOperation op,
-        T neutral)
+        T neutral,
+        cudaStream_t stream = NULL)
         {
             uint elementsPerBlock = 512;
 
             //assert(d > 1);
 
             //todo: reduce small sets on the cpu
-            uint elementsLeft = 2;
+//             uint elementsLeft = 2;
+// 
+//             while(d > 0)
+//             {
+//                 nutty::cuda::ReduceDP(dst(), src(), neutral, d, op, elementsPerBlock, 0, stream);
+// 
+//                 if(d < elementsPerBlock)
+//                 {
+//                     return;
+//                 }
+// 
+//                 uint rest = (d % elementsPerBlock);
+// 
+//                 uint grid = (uint)d / elementsPerBlock;
+// 
+//                 if(rest > 0)
+//                 {
+//                     nutty::cuda::ReduceDP(dst() + grid, src(), neutral, rest, op, rest, elementsPerBlock * grid, stream);
+//                 }
+// 
+//                 src = dst;
+//                 elementsLeft = (uint)d / elementsPerBlock + (rest ? 1 : 0);
+//                 d = elementsLeft;
+//             }
 
-            while(elementsLeft > 1)
+            nutty::cuda::ReduceDP(dst(), src(), neutral, d, op, elementsPerBlock);
+
+            if(d < elementsPerBlock)
             {
-                nutty::cuda::ReduceDP(dst(), src(), neutral, d, op, elementsPerBlock);
-
-                if(d < elementsPerBlock)
-                {
-                    return;
-                }
-
-                uint rest = (d % elementsPerBlock);
-
-                uint grid = (uint)d / elementsPerBlock;
-
-                if(rest > 0)
-                {
-                    nutty::cuda::ReduceDP(dst() + grid, src(), neutral, rest, op, rest, elementsPerBlock * grid);
-                }
-                src = dst;
-                elementsLeft = (uint)d / elementsPerBlock + (rest ? 1 : 0);
+                return;
             }
+ 
+            uint rest = (d % elementsPerBlock);
 
-//             nutty::cuda::ReduceDP(dst(), src(), neutral, d, op, elementsPerBlock);
-// 
-//             if(d < elementsPerBlock)
-//             {
-//                 return;
-//             }
-//  
-//             uint rest = (d % elementsPerBlock);
-// 
-//             uint grid = (uint)d / elementsPerBlock;
-// 
-//             if(rest > 0)
-//             {
-//                 nutty::cuda::ReduceDP(dst() + grid, src(), neutral, rest, op, rest, elementsPerBlock * grid);
-//             }
+            uint grid = (uint)d / elementsPerBlock;
+
+            if(rest > 0)
+            {
+                nutty::cuda::ReduceDP(dst() + grid, src(), neutral, rest, op, rest, elementsPerBlock * grid);
+            }
   
-//             uint elementsLeft = (uint)d / elementsPerBlock + (rest ? 1 : 0);
+            uint elementsLeft = (uint)d / elementsPerBlock + (rest ? 1 : 0);
 
-//             if(elementsLeft > 1)
-//             {
-//                 base::ReduceDP(dst, dst, elementsLeft, op, neutral);
-//             }
+            if(elementsLeft > 1)
+            {
+                base::ReduceDP(dst, dst, elementsLeft, op, neutral);
+            }
         }
 
         template <

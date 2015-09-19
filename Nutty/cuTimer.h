@@ -19,11 +19,13 @@ namespace nutty
 
         void Start(void)
         {
+            cudaDeviceSynchronize();
             QueryPerformanceCounter(&m_start);
         }
 
         void Stop(void)
         {
+            cudaDeviceSynchronize();
             QueryPerformanceCounter(&m_end);
         }
 

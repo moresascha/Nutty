@@ -8,6 +8,8 @@
 #include "../ForEach.h"
 #include "../Functions.h"
 
+#include "../cuTimer.h"
+
 
 int main(void)
 {
@@ -19,18 +21,66 @@ int main(void)
 
     //create nutty
     nutty::Init();
+    std::stringstream profileStream;
+    profileStream.imbue(std::locale( "" ));
 
-    //create device memory (1.048.576 elements)
-    nutty::DeviceBuffer<int> data(10);
+    int startBits = 24;
+    int endBits = 25;
 
-    nutty::Fill(data.Begin(), data.End(), nutty::unary::Sequence<int>());
+    for(int i = startBits; i < endBits; ++i)
+    {
+        int elementCount = 1 << i;
+        profileStream << elementCount << "\n";
+    }
 
-    nutty::Reduce(data.Begin(), data.End(), nutty::binary::Max<int>(), 0);
+    profileStream << "\n";
+    for(uint grid = 1; grid < 24; grid+=1)
+        {
+                       uint elementsPerBlock = nutty::cuda::GetCudaGrid((uint)(1 << startBits), grid);
+                profileStream << grid << "\n";
+        }
+    profileStream << "\n";
+    for(uint grid = 1; grid < 24; grid+=1)
+    {
+        uint elementCount = 1 << startBits;
+        nutty::DeviceBuffer<int> data(elementCount);
 
-    print(data[0]);
-    
+        nutty::Fill(data.Begin(), data.End(), nutty::unary::Sequence<int>());
+
+       // for(int elemsPerBlock = elementCount; elemsPerBlock; elemsPerBlock/=2)
+        {
+            nutty::cuTimer timer;
+
+            timer.Start();
+            for(int s = 0; s < 32; ++s)
+            {
+                nutty::binary::Max<int> op;
+//                 for(int k = 0; k < grid; ++k)
+//                 nutty::Reduce(data.Begin(), data.End(), nutty::binary::Max<int>(), 0);
+
+/*                const uint elementsPerBlock = 2*4096;//d / blockCount; //4 * 512;*/
+                const uint blockSize = 256;//elementsPerBlock / 2;
+
+                //assert(d > 1);
+                //uint grid = nutty::cuda::GetCudaGrid((uint)elementCount, elementsPerBlock);
+                uint elementsPerBlock = nutty::cuda::GetCudaGrid((uint)elementCount, grid);
+                nutty::cuda::blockReduce<blockSize><<<grid, blockSize>>>(data.Begin()(), data.Begin()(), op, 0, elementsPerBlock, (uint)elementCount);
+            }
+                
+            timer.Stop();
+            profileStream << timer.GetMillis()/32.0 << "\n";
+            if(elementCount-1 != data[0])
+            {
+                print(data[0]);
+            }
+        }
+    }
+    OutputDebugStringA("\n");
+    OutputDebugStringA(profileStream.str().c_str());
+
     //release nutty
     nutty::Release();
+
 
     return 0;
 }

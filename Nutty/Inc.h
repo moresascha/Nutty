@@ -16,10 +16,10 @@ typedef unsigned int uint;
 
 namespace cudahErrorLog
 {
-    __host__ void __forceinline LogError(const char* format, const char* error, const char* file, int line)
+    __host__ void __forceinline LogError(const char* format, const char* error, const char* file, int line, int errorEnum)
     {
         std::stringstream ss;
-        ss << error << " in " << file << " " << line << "\n";
+        ss << (error?error:"error==NULL") << " in " << file << " line=" << line << " (enum=)" << errorEnum << "\n";
         OutputDebugStringA(ss.str().c_str());
        __debugbreak();
     }
@@ -37,8 +37,9 @@ namespace cudahErrorLog
 
 #ifdef CUDA_SAFE 
 #define CUDA_DRIVER_SAFE_CALLING_NO_SYNC(__error__) {  \
-    if (CUDA_SUCCESS != __error__) { \
-    cudahErrorLog::LogError("%s\n", getCudaDrvErrorString( __error__), __FILE__, __LINE__); \
+    CUresult __res = __error__; \
+    if (CUDA_SUCCESS != __res) { \
+    cudahErrorLog::LogError("%s\n", getCudaDrvErrorString(__res), __FILE__, __LINE__, __res); \
     } }
 #else
 #define CUDA_DRIVER_SAFE_CALLING_NO_SYNC(__error__) __error__
@@ -48,7 +49,7 @@ namespace cudahErrorLog
 #define CUDA_DRIVER_SAFE_CALLING_SYNC(__error__) {  \
     CUresult __res = __error__;\
     if (__res != CUDA_SUCCESS || CUDA_SUCCESS != cuCtxSynchronize()) { \
-    cudahErrorLog::LogError("%s\n", getCudaDrvErrorString( __error__), __FILE__, __LINE__); \
+    cudahErrorLog::LogError("%s\n", getCudaDrvErrorString(__error__), __FILE__, __LINE__, __res); \
     } }
 #else
 #define CUDA_DRIVER_SAFE_CALLING_SYNC(__error__) __error__
@@ -56,8 +57,9 @@ namespace cudahErrorLog
 
 #ifdef CUDA_SAFE 
 #define CUDA_RT_SAFE_CALLING_NO_SYNC(__error__) {  \
-    if (cudaSuccess != __error__) { \
-    cudahErrorLog::LogError("%s\n", cudaGetErrorString( __error__), __FILE__, __LINE__); \
+    cudaError_t __res = __error__; \
+    if (cudaSuccess != __res) { \
+    cudahErrorLog::LogError("%s\n", cudaGetErrorString(__res), __FILE__, __LINE__, __res); \
     } }
 #else
 #define CUDA_RT_SAFE_CALLING_NO_SYNC(__error__) __error__
@@ -65,9 +67,10 @@ namespace cudahErrorLog
 
 #ifdef CUDA_SAFE 
 #define CUDA_RT_SAFE_CALLING_SYNC(__error__) {  \
-    __error__;\
+    cudaError_t __res = __error__; \
+    __res = cudaDeviceSynchronize(); \
     if (cudaSuccess != cudaDeviceSynchronize()) { \
-    cudahErrorLog::LogError("%s\n", cudaGetErrorString( __error__), __FILE__, __LINE__); \
+    cudahErrorLog::LogError("%s\n", cudaGetErrorString(__res), __FILE__, __LINE__, __res); \
     } }
 #else
 #define CUDA_RT_SAFE_CALLING_SYNC(__error__) __error__

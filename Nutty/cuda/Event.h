@@ -32,6 +32,20 @@ namespace nutty
             return m_event;
         }
 
+        CUevent Free(void)
+        {
+            CUevent cpy = m_event;
+            m_event = NULL;
+            return cpy;
+        }
+
+        cuEvent& operator=(cuEvent&& other)
+        {
+            m_event = other.m_event;
+            other.m_event = NULL;
+            return *this;
+        }
+
         ~cuEvent(void)
         {
             if(m_event)

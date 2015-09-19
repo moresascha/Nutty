@@ -3,7 +3,7 @@
 
 #define NUM_BANKS 32   //fermi / kepler
 #define LOG_NUM_BANKS 5
-#define CONFLICT_FREE_OFFSET(n) ((n) >> NUM_BANKS + (n) >> (2 * LOG_NUM_BANKS))  
+#define CONFLICT_FREE_OFFSET(n) ((n) >> NUM_BANKS + (n) >> (2 * LOG_NUM_BANKS))
 
 namespace nutty
 {
@@ -97,9 +97,24 @@ namespace nutty
         template <
             typename T
         >
-        __host__ __device__ __forceinline T GetCudaBlock(T dataCnt, T groupSize)
+        __host__ __device__ __forceinline T GetCudaBlock(T N)
         {
-            return  dataCnt < groupSize ? dataCnt : groupSize;;
+            if(N > 128)
+            {
+                return 256;
+            } 
+            else if(N > 64)
+            {
+                return 128;
+            } 
+            else if(N > 32)
+            {
+                return 64;
+            }
+            else
+            {
+                return 32;
+            }
         }
     }
 }

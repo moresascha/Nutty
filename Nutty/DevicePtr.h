@@ -23,6 +23,11 @@ namespace nutty
             : base_class(ptr)
         {
         }
+
+        __device__ __host__ DevicePtr(void) 
+            : base_class(NULL)
+        {
+        }
     };
 
     template <

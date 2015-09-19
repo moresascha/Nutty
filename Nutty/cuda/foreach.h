@@ -27,7 +27,7 @@ namespace nutty
         >
         void foreach(T* start, uint size, Operator op)
         {
-            dim3 blockDim = cuda::GetCudaBlock(size, 256U);
+            dim3 blockDim = cuda::GetCudaBlock(size);
             dim3 grid = cuda::GetCudaGrid(size, blockDim.x);
 
             _foreach<<<grid, blockDim>>>(start, op, size);

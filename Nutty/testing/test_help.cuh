@@ -1,5 +1,8 @@
 #pragma once
 #include <windows.h>
+#ifdef _DEBUG
+#define NUTTY_DEBUG
+#endif
 #include "../Nutty.h"
 #include "../Fill.h"
 #include <sstream>

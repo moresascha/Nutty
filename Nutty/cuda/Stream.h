@@ -11,12 +11,10 @@ namespace nutty
 
         cuStream(cuStream&) {}
 
-        std::vector<cuEvent> m_events;
-
     public:
         cuStream(void)
         {
-            CUDA_DRIVER_SAFE_CALLING_NO_SYNC(cuStreamCreate(&m_stream, 0));
+            CUDA_DRIVER_SAFE_CALLING_SYNC(cuStreamCreate(&m_stream, 0));
         }
 
         cuStream(cuStream&& s)
@@ -37,19 +35,16 @@ namespace nutty
 
         void WaitEvent(cuEvent event)
         {
-            CUDA_DRIVER_SAFE_CALLING_NO_SYNC(cuStreamWaitEvent(m_stream, event(), 0));
-            m_events.push_back(std::move(event));
-        }
-
-        void ClearEvents(void)
-        {
-            m_events.clear();
+            CUevent ptr = event.Free();
+            CUDA_DRIVER_SAFE_CALLING_SYNC(cuStreamWaitEvent(m_stream, ptr, 0));
+            //m_events.push_back(ptr);
+            CUDA_DRIVER_SAFE_CALLING_SYNC(cuEventDestroy(ptr));
         }
 
         cuEvent RecordEvent(void) const
         {
             cuEvent e;
-            CUDA_DRIVER_SAFE_CALLING_NO_SYNC(cuEventRecord(e(), m_stream));
+            CUDA_DRIVER_SAFE_CALLING_SYNC(cuEventRecord(e(), m_stream));
             return e;
         }
 
@@ -57,8 +52,7 @@ namespace nutty
         {
             if(m_stream)
             {
-                ClearEvents();
-                CUDA_DRIVER_SAFE_CALLING_NO_SYNC(cuStreamDestroy(m_stream));
+                CUDA_DRIVER_SAFE_CALLING_SYNC(cuStreamDestroy(m_stream));
                 m_stream = NULL;
             }
         }
@@ -82,17 +76,24 @@ namespace nutty
             }
         }
 
+        void Reset(void)
+        {
+            m_index = 0;
+        }
+
+        byte GetStreamCount(void)
+        {
+            return MAX_LIMIT;
+        }
+        
         cuStream& PeekNextStream(void)
         {
             return *m_pStreams[(m_index++) % m_limit];
         }
 
-        void ClearEvents(void)
+        cuStream& GetStream(byte index)
         {
-            for(byte i = 0; i < m_limit; ++i)
-            {
-                m_pStreams[i]->ClearEvents();
-            }
+            return *m_pStreams[index];
         }
 
         ~cuStreamPool(void)

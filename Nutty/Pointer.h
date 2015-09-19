@@ -52,20 +52,20 @@ namespace nutty
         >
         __device__ __host__ friend Pointer<T> operator-(const Pointer<T>& i0, const Pointer<T>& i1);
 
-        template <
+        /*template <
             typename T
         >
-        __device__ __host__ friend Pointer<T> operator+(const Pointer<T>& i0, size_type i);
+        __device__ __host__ friend Pointer<T> operator+(const Pointer<T>& i0, size_type i);*/
 
 //         template <
 //             typename T
 //         >
 //         __device__ __host__ friend Pointer<T> operator+(const Pointer<T>& i0, unsigned long long i);
 
-        template <
+        /*template <
             typename T
         >
-        __device__ __host__ friend Pointer<T> operator-(const Pointer<T>& i0, size_type i);
+        __device__ __host__ friend Pointer<T> operator-(const Pointer<T>& i0, size_type i); */
     };
 
     template <

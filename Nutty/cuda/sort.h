@@ -2,6 +2,10 @@
 #include "Globals.cuh"
 #include "cuda_helper.h"
 
+#ifndef ___host
+#define ___host __host__ __device__
+#endif
+
 namespace nutty
 {
     namespace cuda
@@ -161,31 +165,32 @@ namespace nutty
             typename T,
             typename BinaryOperation
         >
-        __host__ void SortPerGroup(
+        ___host void SortPerGroup(
         DevicePtr<T>& vals,
-        uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
+        uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op, cudaStream_t pStream = NULL)
         {
-            cudaBitonicMergeSortPerGroup(vals(), elementsPerBlock, startStage, endStage, startStep, length, op);
+            cudaBitonicMergeSortPerGroup(vals(), elementsPerBlock, startStage, endStage, startStep, length, op, pStream);
         }
 
         template <
             typename T,
             typename BinaryOperation
         >
-        __host__ void SortPerGroup(
+        ___host void SortPerGroup(
         Iterator<
             T, nutty::base::Base_Buffer<T, nutty::DeviceContent<T>, nutty::CudaAllocator<T>>
             >& vals,
-        uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
+        uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op, cudaStream_t pStream = NULL)
         {
-            cudaBitonicMergeSortPerGroup(vals(), elementsPerBlock, startStage, endStage, startStep, length, op);
+            cudaBitonicMergeSortPerGroup(vals(), elementsPerBlock, startStage, endStage, startStep, length, op, pStream);
         }
 
         template <
             typename T,
             typename BinaryOperation
         >
-        __host__ void cudaBitonicMergeSortPerGroup(T* begin, uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op)
+        ___host void cudaBitonicMergeSortPerGroup(
+        T* begin, uint elementsPerBlock, uint startStage, uint endStage, uint startStep, uint length, BinaryOperation op, cudaStream_t pStream = NULL)
         {
             dim3 block = (elementsPerBlock + elementsPerBlock%2)/2;
             dim3 grid = GetCudaGrid(length, elementsPerBlock);
@@ -193,7 +198,7 @@ namespace nutty
             uint shrdMem = elementsPerBlock * sizeof(T);
 
             bitonicMergeSortPerGroup
-                <<<grid, block, shrdMem>>>
+                <<<grid, block, shrdMem, pStream>>>
                 (
                 begin, startStage, endStage, startStep, length, op
                 );
@@ -203,12 +208,12 @@ namespace nutty
             typename Iterator_,
             typename BinaryOperation
         >
-        __host__ void SortStep(
+        ___host void SortStep(
             Iterator_& values,
-        uint grid, uint block, uint stage, uint step, uint length, BinaryOperation op)
+        uint grid, uint block, uint stage, uint step, uint length, BinaryOperation op, cudaStream_t pStream = NULL)
         {
             bitonicMergeSortStep
-                <<<grid, block, 0>>>
+                <<<grid, block, 0, pStream>>>
                 (
                 values(), stage, step, length, op
                 );
